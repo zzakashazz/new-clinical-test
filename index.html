@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>AI Clinical Pharmacist</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+
+/* ════════ DESIGN TOKENS ════════ */
+:root{
+  --t9:#0c3b38;--t8:#115e59;--t7:#0f766e;--t6:#0d9488;--t5:#14b8a6;--t4:#2dd4bf;
+  --t1:#ccfbf1;--t0:#f0fdfa;
+  --s9:#0b1220;--s8:#1e293b;--s7:#334155;--s6:#52647a;--s4:#94a3b8;
+  --s2:#e2e8f0;--s1:#f1f5f9;
+  --bg:#f5f8f8;--white:#fff;--border:#e6edf0;
+  --hh:56px;--tbh:60px;
+  --card-bg:#fff;--inp-bg:#fff;--sec-bg:#f5f9f9;--sec-border:#e6edf0;
+  --bubble-ai:#fff;--ctx-bg:#fff;--tab-bg:#fff;--modal-bg:#fff;
+  --chat-bar-bg:#fff;
+  --code-bg:#effaf5;--code-c:#065f46;--pre-bg:#f6faf9;
+  --th-bg:#e3f7f3;--th-c:#0c3b38;--td-alt:#fafffe;--bq-bg:#f0fdfa;
+  --err-bg:#fff1f2;--err-border:#fecdd3;--err-c:#9f1239;
+  --img-bar-bg:#fefce8;--img-bar-border:#fde047;
+  --dm-trn:background .25s,color .25s,border-color .25s;
+  --r-sm:9px;--r-md:13px;--r-lg:18px;--r-xl:22px;
+  --sh-xs:0 1px 2px rgba(15,60,56,.05);
+  --sh-sm:0 2px 6px rgba(15,60,56,.06),0 1px 2px rgba(15,60,56,.05);
+  --sh-md:0 6px 18px -6px rgba(13,80,74,.16),0 2px 6px rgba(15,60,56,.05);
+  --sh-lg:0 18px 44px -14px rgba(13,80,74,.28),0 6px 14px -8px rgba(15,60,56,.12);
+  --ring:0 0 0 3px rgba(20,184,166,.16);
+  --grad-teal:linear-gradient(135deg,#0b6b63,#0f766e 42%,#16b8a8);
+}
+/* ── DARK ── */
+[data-theme="dark"]{
+  --bg:#0a121d;--white:#142235;--border:#21384f;
+  --s9:#f8fafc;--s8:#e8eef5;--s7:#c6d3e1;--s6:#93a6bb;--s4:#5a738c;
+  --s2:#21384f;--s1:#142235;--t0:#07211f;--t1:#0b2d2a;
+  --card-bg:#16273b;--inp-bg:#16273b;--sec-bg:#101d2c;--sec-border:#21384f;
+  --bubble-ai:#16273b;--ctx-bg:#142235;--tab-bg:#0e1a28;--modal-bg:#17283c;
+  --chat-bar-bg:#101d2c;
+  --code-bg:#0a2a27;--code-c:#5eead4;--pre-bg:#101d2c;
+  --th-bg:#0a2a27;--th-c:#5eead4;--td-alt:#15212f;--bq-bg:#07211f;
+  --err-bg:#2d1017;--err-border:#4a1020;--err-c:#fca5a5;
+  --img-bar-bg:#1e2a0e;--img-bar-border:#3d5210;
+  --sh-xs:none;--sh-sm:0 2px 8px rgba(0,0,0,.3);--sh-md:0 8px 22px -8px rgba(0,0,0,.5);
+  --sh-lg:0 20px 50px -16px rgba(0,0,0,.6);--ring:0 0 0 3px rgba(20,184,166,.22);
+  --grad-teal:linear-gradient(135deg,#06302c,#0d4a43 48%,#0d9488);
+}
+[data-theme="dark"] .app-hd{background:var(--grad-teal)}
+[data-theme="dark"] .tabs,[data-theme="dark"] .tab-btn{background:var(--tab-bg)}
+[data-theme="dark"] .chat-hd,[data-theme="dark"] .result-hd{background:linear-gradient(to right,var(--t0),var(--card-bg))}
+[data-theme="dark"] .bubble.ai{box-shadow:none;border-color:var(--border)}
+[data-theme="dark"] .bubble.err{background:var(--err-bg);border-color:var(--err-border);color:var(--err-c)}
+[data-theme="dark"] .err-box{background:var(--err-bg);border-color:var(--err-border);color:var(--err-c)}
+[data-theme="dark"] .atag{background:var(--inp-bg);color:var(--s6);border-color:var(--border)}
+[data-theme="dark"] .atag.on{background:#2d1017;color:#fca5a5;border-color:#4a1020}
+[data-theme="dark"] .pill-sl{background:var(--inp-bg);color:var(--s6);border-color:var(--border)}
+[data-theme="dark"] .pill-tl{background:var(--t0);color:#5eead4;border-color:var(--t1)}
+[data-theme="dark"] .pill-vi{background:#1e1040;color:#a78bfa;border-color:#2e1a60}
+[data-theme="dark"] .mbt{background:var(--inp-bg);color:var(--s7);border-color:var(--border)}
+[data-theme="dark"] .mbt:hover:not(:disabled){background:var(--sec-bg)}
+[data-theme="dark"] .sg-card{background:var(--inp-bg);border-color:var(--border);color:var(--s7)}
+[data-theme="dark"] .sg-card strong{color:var(--s8)}
+[data-theme="dark"] .sg-card:hover{background:var(--t0);border-color:var(--t5);color:var(--t5)}
+[data-theme="dark"] .bdg-blue{background:#0c2a4a;color:#7dd3fc}
+[data-theme="dark"] .bdg-amber{background:#2a1a00;color:#fbbf24}
+[data-theme="dark"] .bdg-violet{background:#1e1040;color:#a78bfa}
+[data-theme="dark"] .drop-zone:hover,[data-theme="dark"] .drop-zone.drag-over{background:var(--t0);color:var(--t5)}
+[data-theme="dark"] .img-pill{background:var(--inp-bg);border-color:var(--border)}
+[data-theme="dark"] .modal-ov{background:rgba(4,9,16,.7)}
+[data-theme="dark"] .md h2{color:var(--s7)}
+[data-theme="dark"] .md blockquote{color:#5eead4}
+[data-theme="dark"] .modal-title{color:var(--s8)}
+[data-theme="dark"] .filter-btn{background:var(--inp-bg);color:var(--s6);border-color:var(--border)}
+[data-theme="dark"] .filter-btn.on{background:var(--t6);color:#fff;border-color:var(--t6)}
+[data-theme="dark"] .dose-ok{color:#4ade80}
+[data-theme="dark"] .dose-warn{color:#fbbf24}
+[data-theme="dark"] .dose-reduce{color:#f87171}
+[data-theme="dark"] .dose-avoid{background:#3b0000;color:#fca5a5}
+[data-theme="dark"] .renal-table th{background:var(--sec-bg);color:var(--s6)}
+[data-theme="dark"] .renal-table tr:hover td{background:var(--sec-bg)}
+[data-theme="dark"] .hist-item{background:var(--inp-bg);border-color:var(--border)}
+[data-theme="dark"] .hist-ico{background:var(--t0)}
+[data-theme="dark"] .dose-chat-bubble.ai{background:var(--inp-bg);border-color:var(--border)}
+[data-theme="dark"] .dose-chip{background:var(--inp-bg);border-color:var(--border);color:var(--s6)}
+[data-theme="dark"] .dose-chip:hover{background:var(--t0);border-color:var(--t5);color:var(--t5)}
+[data-theme="dark"] .dose-empty{color:var(--s4)}
+[data-theme="dark"] body{background:radial-gradient(1100px 520px at 88% -8%,rgba(13,148,136,.1),transparent 60%),var(--bg)}
+[data-theme="dark"] .card-hd{background:linear-gradient(to right,rgba(13,148,136,.07),transparent)}
+
+/* ════════ BASE ════════ */
+body,body *{transition:var(--dm-trn)}
+.spin,.loading-ring,.pdot,.td,.icon-btn,.btn-main,.pill{transition:none!important}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;-webkit-tap-highlight-color:transparent}
+body{height:100%;background:radial-gradient(1100px 540px at 92% -10%,#e4f4f0 0,transparent 58%),radial-gradient(900px 480px at -5% 108%,#e8f1f6 0,transparent 52%),var(--bg);font-family:'Sarabun',sans-serif;color:var(--s8);display:flex;flex-direction:column;overflow:hidden}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(100,116,139,.32);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(100,116,139,.5);background-clip:padding-box}
+
+/* ════════ HEADER ════════ */
+.app-hd{height:var(--hh);flex-shrink:0;background:var(--grad-teal);display:flex;align-items:center;justify-content:space-between;padding:0 1.1rem;z-index:30;position:relative;box-shadow:0 4px 20px -6px rgba(13,80,74,.5);overflow:hidden}
+.app-hd::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.16),transparent 42%);pointer-events:none}
+.app-hd::after{content:'';position:absolute;top:0;left:-30%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.22),transparent);transform:skewX(-18deg);pointer-events:none;animation:sheen 7s ease-in-out 1.2s infinite}
+.brand{display:flex;align-items:center;gap:.6rem;position:relative}
+.brand-ico{width:34px;height:34px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.28);border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.95rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 2px 8px rgba(0,0,0,.12)}
+.brand-name{color:#fff;font-weight:700;font-size:1rem;letter-spacing:.01em;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.12)}
+.model-pill{font-size:.66rem;font-weight:600;background:rgba(255,255,255,.16);color:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.26);padding:4px 11px;border-radius:99px;display:flex;align-items:center;gap:5px;white-space:nowrap;backdrop-filter:blur(6px)}
+.pdot{width:7px;height:7px;border-radius:50%;background:#5af0a0;box-shadow:0 0 0 0 rgba(90,240,160,.7);animation:pdot 2.2s ease-in-out infinite}
+@keyframes pdot{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(90,240,160,.55)}50%{opacity:.65;box-shadow:0 0 0 5px rgba(90,240,160,0)}}
+.dm-btn{width:34px;height:34px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.26);border-radius:11px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;transition:background .2s,transform .2s}
+.dm-btn:hover{background:rgba(255,255,255,.3);transform:rotate(-12deg) scale(1.05)}
+.dm-btn:active{transform:scale(.92)}
+
+/* ════════ TABS ════════ */
+.tabs{background:var(--tab-bg);border-bottom:1px solid var(--border);display:flex;flex-shrink:0;z-index:20;box-shadow:0 1px 0 rgba(15,60,56,.02),var(--sh-xs);padding:0 .35rem}
+.tab-btn{flex:1;position:relative;display:flex;align-items:center;justify-content:center;gap:.45rem;padding:.8rem .5rem;font-size:.82rem;font-weight:600;color:var(--s4);border:none;background:none;cursor:pointer;transition:color .22s;white-space:nowrap;font-family:'Sarabun',sans-serif}
+.tab-btn i{transition:transform .25s}
+.tab-btn::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:3px;border-radius:99px 99px 0 0;background:linear-gradient(90deg,var(--t6),var(--t4));box-shadow:0 0 10px rgba(20,184,166,.6);transition:width .28s cubic-bezier(.4,1.3,.5,1)}
+.tab-btn.on{color:var(--t7)}
+.tab-btn.on::after{width:64%}
+.tab-btn.on i{transform:translateY(-1px) scale(1.08)}
+.tab-btn:hover:not(.on){color:var(--s7)}
+.tab-btn:hover:not(.on)::after{width:26%;background:var(--s2);box-shadow:none}
+.tbadge{font-size:.6rem;font-weight:700;padding:1.5px 7px;border-radius:99px;background:var(--s1);color:var(--s4);transition:all .22s}
+.tab-btn.on .tbadge{background:var(--t1);color:var(--t7)}
+
+/* ════════ PANELS ════════ */
+.panels{flex:1;overflow:hidden}
+.panel{display:none;height:100%;width:100%}
+.panel.on{display:flex;flex-direction:column}
+@media(prefers-reduced-motion:no-preference){
+  .panel.on{animation:panelIn .3s ease both}
+  .panel.on .card{animation:cardIn .42s cubic-bezier(.22,.9,.3,1) both}
+  .panel.on .review-left .card{animation-delay:.02s}
+  .panel.on .review-right .card{animation-delay:.1s}
+  .panel.on .calc-col:nth-child(1) .card:nth-child(2){animation-delay:.08s}
+  .panel.on .calc-col:nth-child(2) .card:nth-child(1){animation-delay:.06s}
+  .panel.on .calc-col:nth-child(2) .card:nth-child(2){animation-delay:.13s}
+}
+
+/* ════════ REVIEW ════════ */
+.review-wrap{flex:1;overflow:auto;padding:1.15rem;display:grid;grid-template-columns:1fr;gap:1.15rem;align-content:start}
+@media(min-width:960px){.review-wrap{grid-template-columns:392px 1fr;align-content:stretch}.review-left,.review-right{overflow-y:auto;max-height:calc(100vh - var(--hh) - 54px)}}
+
+/* ════════ CHAT ════════ */
+.chat-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.chat-hd{flex-shrink:0;padding:.7rem 1.1rem;background:linear-gradient(to right,var(--t0),var(--white) 70%);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.chat-hd-title{display:flex;align-items:center;gap:.45rem;font-weight:700;font-size:.92rem;color:var(--s8)}
+.chat-hd-title i{color:var(--t6)}
+.msgs{flex:1;overflow-y:auto;padding:1.15rem;display:flex;flex-direction:column;gap:.95rem;scroll-behavior:smooth}
+.chat-welcome{padding:1.5rem 1rem .5rem;text-align:center}
+.welcome-icon{width:66px;height:66px;background:linear-gradient(135deg,var(--t0),#dff0fb);border:1px solid var(--t1);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--t6);margin:0 auto .9rem;box-shadow:0 10px 26px -10px rgba(13,148,136,.4)}
+@media(prefers-reduced-motion:no-preference){.welcome-icon{animation:floaty 4s ease-in-out infinite}}
+.suggest-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:1rem;padding:0 .25rem}
+@media(min-width:600px){.suggest-grid{grid-template-columns:repeat(3,1fr)}}
+.sg-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-md);padding:.8rem .85rem;cursor:pointer;transition:transform .18s,box-shadow .2s,border-color .18s,background .18s,color .18s;text-align:left;display:flex;flex-direction:column;gap:.22rem;font-size:.78rem;color:var(--s7);font-family:'Sarabun',sans-serif;box-shadow:var(--sh-xs)}
+.sg-card:hover{border-color:var(--t5);background:var(--t0);color:var(--t7);transform:translateY(-3px);box-shadow:var(--sh-md)}
+.sg-card i{font-size:1rem;color:var(--t5);margin-bottom:.15rem}
+.sg-card strong{font-size:.82rem;font-weight:700;color:var(--s8);display:block}
+.sg-card span{color:var(--s4);font-size:.74rem;line-height:1.45}
+.img-bar{flex-shrink:0;padding:.5rem 1.1rem;background:var(--img-bar-bg);border-top:1px solid var(--img-bar-border);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.img-pill{display:flex;align-items:center;gap:.4rem;background:var(--card-bg);border:1px solid var(--border);border-radius:9px;padding:.28rem .55rem;box-shadow:var(--sh-xs)}
+.img-pill img{width:34px;height:34px;object-fit:cover;border-radius:6px}
+.img-pill span{font-size:.7rem;color:var(--s7);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.img-rm{background:none;border:none;cursor:pointer;color:var(--s4);padding:2px 5px;border-radius:5px;font-size:.72rem;transition:all .15s}
+.img-rm:hover{background:var(--err-bg);color:#dc2626}
+.chat-bar{flex-shrink:0;padding:.7rem 1rem;border-top:1px solid var(--border);background:var(--chat-bar-bg);display:flex;align-items:flex-end;gap:.45rem;box-shadow:0 -4px 16px -10px rgba(15,60,56,.18)}
+.chat-ta{flex:1;border:1.5px solid var(--border);border-radius:14px;padding:.62rem .85rem;font-size:.9rem;font-family:'Sarabun',sans-serif;resize:none;max-height:130px;overflow-y:auto;line-height:1.55;background:var(--inp-bg);color:var(--s8);transition:border-color .18s,box-shadow .18s;min-height:44px}
+.chat-ta:focus{outline:none;border-color:var(--t5);box-shadow:var(--ring)}
+.chat-ta::placeholder{color:var(--s4)}
+.icon-btn{width:40px;height:40px;flex-shrink:0;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.82rem;transition:transform .16s,background .18s,color .18s,box-shadow .2s}
+.ib-ghost{background:var(--s1);color:var(--s6)}.ib-ghost:hover{background:var(--s2);color:var(--s8)}
+.ib-ghost:active{transform:scale(.9)}
+.ib-primary{background:var(--grad-teal);color:#fff;box-shadow:0 4px 14px -4px rgba(13,148,136,.6)}
+.ib-primary:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px -6px rgba(13,148,136,.7)}
+.ib-primary:active:not(:disabled){transform:scale(.93)}
+.ib-primary:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.icon-btn.recording{background:#fee2e2;color:#dc2626;animation:recPulse 1s ease-in-out infinite}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.35)}50%{box-shadow:0 0 0 7px rgba(220,38,38,0)}}
+
+/* ════════ BUBBLES ════════ */
+.msg-row{display:flex;gap:.55rem;align-items:flex-start}.msg-row.user{flex-direction:row-reverse}
+@media(prefers-reduced-motion:no-preference){.msg-row{animation:bubbleIn .34s cubic-bezier(.22,.9,.3,1) both}}
+.msg-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;box-shadow:var(--sh-sm)}
+.msg-av.ai{background:var(--grad-teal);color:#fff;box-shadow:0 3px 10px -3px rgba(13,148,136,.6)}
+.msg-av.usr{background:linear-gradient(135deg,#6d28d9,#9061f9);color:#fff;box-shadow:0 3px 10px -3px rgba(124,58,237,.55)}
+.msg-body{max-width:85%;display:flex;flex-direction:column}
+@media(min-width:768px){.msg-body{max-width:78%}}
+.bubble{border-radius:16px;padding:.7rem .95rem;font-size:.875rem;line-height:1.75}
+.bubble.ai{background:var(--bubble-ai);border:1px solid var(--border);border-radius:5px 16px 16px 16px;box-shadow:var(--sh-sm)}
+.bubble.usr{background:var(--grad-teal);color:#fff;border-radius:16px 5px 16px 16px;box-shadow:0 4px 14px -6px rgba(13,148,136,.5)}
+.bubble.usr strong{color:#bdf5e4}
+.bubble.err{background:var(--err-bg);border:1px solid var(--err-border);border-left:4px solid #f43f5e;color:var(--err-c);border-radius:12px}
+.msg-meta{font-size:.66rem;color:var(--s4);margin-top:.28rem;display:flex;align-items:center;gap:.35rem}
+.msg-row.user .msg-meta{flex-direction:row-reverse}
+.cp-btn{opacity:0;background:none;border:none;cursor:pointer;color:var(--s4);font-size:.66rem;padding:1px 5px;border-radius:4px;transition:opacity .15s,background .15s}
+.msg-row:hover .cp-btn{opacity:1}.cp-btn:hover{background:var(--s1);color:var(--s7)}
+.msg-img{max-width:190px;border-radius:10px;margin-top:.35rem;cursor:pointer;display:block;box-shadow:var(--sh-sm)}
+.typing{display:flex;gap:5px;align-items:center;padding:.3rem .1rem}
+.td{width:8px;height:8px;border-radius:50%;background:var(--t5);animation:tdB .9s ease-in-out infinite}
+.td:nth-child(2){animation-delay:.15s}.td:nth-child(3){animation-delay:.3s}
+@keyframes tdB{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(-7px);opacity:1}}
+
+/* ════════ CARDS ════════ */
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--sh-md);overflow:hidden}
+.card-hd{padding:.85rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;background:linear-gradient(to right,rgba(20,184,166,.05),transparent 65%)}
+.card-title{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.9rem;color:var(--s8);white-space:nowrap}
+.card-title i{color:var(--t6);font-size:.95rem}
+.card-bd{padding:1.1rem}
+
+/* ════════ FORM ════════ */
+.lbl{display:block;font-size:.7rem;font-weight:700;color:var(--s6);margin-bottom:4px;letter-spacing:.02em}
+.inp{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:9px 11px;font-size:.875rem;font-family:'Sarabun',sans-serif;background:var(--inp-bg);color:var(--s8);transition:border-color .18s,box-shadow .18s,background .18s}
+.inp:hover:not(:focus){border-color:#cfdbe0}
+.inp:focus{outline:none;border-color:var(--t5);box-shadow:var(--ring)}
+.inp::placeholder{color:var(--s4)}
+textarea.inp{resize:vertical}
+select.inp{cursor:pointer}
+.inp-mono{font-family:'IBM Plex Mono',monospace;font-size:.78rem;line-height:1.6}
+.inp-allergy{color:#dc2626;font-weight:500}.inp-allergy::placeholder{color:#fca5a5}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.65rem}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fstack{display:flex;flex-direction:column;gap:.8rem}
+.req{color:#ef4444;margin-left:2px}
+.calc-hint{font-size:.66rem;color:var(--t6);margin-top:3px;font-weight:600}
+.sec-box{background:var(--sec-bg);border:1px solid var(--sec-border);border-radius:12px;padding:.85rem}
+.atags{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+.atag{font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:99px;border:1.5px solid var(--border);background:var(--inp-bg);color:var(--s6);cursor:pointer;transition:all .15s;font-family:'Sarabun',sans-serif}
+.atag:hover{border-color:#fca5a5;color:#dc2626;transform:translateY(-1px)}
+.atag.on{background:#fff1f2;color:#dc2626;border-color:#fecdd3}
+.bdg{font-size:.6rem;font-weight:700;padding:1.5px 7px;border-radius:99px}
+.bdg-blue{background:#eff6ff;color:#1d4ed8}
+.bdg-amber{background:#fef3c7;color:#92400e}
+.bdg-violet{background:#f5f3ff;color:#6d28d9}
+.cbw{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--s6);cursor:pointer}
+.cbw input[type=checkbox]{accent-color:var(--t6);width:15px;height:15px}
+
+/* ════════ BUTTONS ════════ */
+.btn-main{width:100%;position:relative;overflow:hidden;background:var(--grad-teal);color:#fff;padding:13px;border-radius:13px;font-size:.94rem;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .16s,box-shadow .22s;box-shadow:0 8px 22px -8px rgba(13,148,136,.55)}
+.btn-main::after{content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);transition:left .55s ease}
+.btn-main:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 30px -10px rgba(13,148,136,.65)}
+.btn-main:hover:not(:disabled)::after{left:130%}
+.btn-main:active:not(:disabled){transform:translateY(0) scale(.99)}
+.btn-main:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;padding:5px 11px;border-radius:99px;border:1px solid;cursor:pointer;transition:transform .15s,box-shadow .18s,background .15s,color .15s,border-color .15s;font-family:'Sarabun',sans-serif;white-space:nowrap}
+.pill:hover{transform:translateY(-1px);box-shadow:var(--sh-sm)}
+.pill:active{transform:scale(.95)}
+.pill-sl{background:var(--card-bg);color:var(--s6);border-color:var(--border)}
+.pill-sl:hover{color:var(--s8);border-color:#cfdbe0}
+.pill-tl{background:var(--t0);color:var(--t7);border-color:var(--t1)}
+.pill-vi{background:#f5f3ff;color:#6d28d9;border-color:#ddd6fe}
+.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spinning .65s linear infinite;flex-shrink:0}
+@keyframes spinning{to{transform:rotate(360deg)}}
+
+/* ════════ RESULT ════════ */
+.result-hd{padding:.8rem 1.1rem;background:linear-gradient(to right,var(--t0),var(--card-bg) 70%);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.45rem}
+.result-title{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:.9rem;color:var(--s8)}
+.result-title i{color:var(--t6)}
+.empty-st{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:350px;text-align:center;color:var(--s4)}
+.empty-ico{width:72px;height:72px;background:linear-gradient(135deg,var(--t0),#dff0fb);border:1px solid var(--t1);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--t6);margin-bottom:1rem;box-shadow:0 12px 30px -12px rgba(13,148,136,.45)}
+@media(prefers-reduced-motion:no-preference){.empty-ico{animation:floaty 4.5s ease-in-out infinite}}
+.caps{display:flex;flex-wrap:wrap;justify-content:center;gap:.35rem;margin-top:1rem}
+.cap{font-size:.66rem;font-weight:600;padding:3px 11px;border-radius:99px;border:1px solid}
+.loading-st{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:350px;gap:1rem}
+.loading-ring{width:50px;height:50px;border:4px solid var(--t1);border-top-color:var(--t6);border-radius:50%;animation:spinning .7s linear infinite}
+.err-box{background:var(--err-bg);border:1px solid var(--err-border);border-left:4px solid #f43f5e;border-radius:12px;padding:.95rem 1.1rem;color:var(--err-c);font-size:.875rem;line-height:1.65;white-space:pre-line}
+
+/* ════════ MARKDOWN ════════ */
+.md{line-height:1.8;color:var(--s8);font-size:.875rem}
+.md h1{font-size:1.12rem;font-weight:700;color:var(--t7);margin:1.1rem 0 .5rem;padding-bottom:.4rem;border-bottom:2px solid var(--t1)}
+.md h2{font-size:.96rem;font-weight:700;color:var(--t9);margin:1rem 0 .4rem;display:flex;align-items:center;gap:.4rem}
+.md h2::before{content:'';display:inline-block;width:4px;height:1.05em;border-radius:3px;background:linear-gradient(var(--t5),var(--t6));flex-shrink:0}
+.md h3{font-size:.88rem;font-weight:700;color:var(--t6);margin:.75rem 0 .3rem}
+.md ul{list-style:disc;padding-left:1.25rem;margin:.4rem 0}
+.md ol{list-style:decimal;padding-left:1.25rem;margin:.4rem 0}
+.md li{margin-bottom:.25rem}
+.md p{margin:.45rem 0}
+.md strong{color:var(--t6);font-weight:700}
+.md em{color:var(--s6)}
+.md code{background:var(--code-bg);color:var(--code-c);padding:1.5px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:.78em}
+.md pre{background:var(--pre-bg);border:1px solid var(--border);border-radius:10px;padding:.85rem;overflow-x:auto;margin:.65rem 0}
+.md pre code{background:none;padding:0}
+.md table{width:100%;border-collapse:collapse;margin:.65rem 0;font-size:.78rem;border-radius:10px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--sh-xs)}
+.md th{background:var(--th-bg);color:var(--th-c);font-weight:700;padding:8px 10px;border:1px solid var(--border);text-align:left;font-size:.73rem}
+.md td{padding:7px 10px;border:1px solid var(--border);vertical-align:top}
+.md tr:nth-child(even) td{background:var(--td-alt)}
+.md blockquote{border-left:3px solid var(--t5);background:var(--bq-bg);margin:.65rem 0;padding:.5rem .95rem;border-radius:0 10px 10px 0;color:var(--t7)}
+.md hr{border:none;border-top:1px solid var(--border);margin:.95rem 0}
+
+/* ════════ DROP ZONE ════════ */
+.drop-zone{border:2px dashed var(--border);border-radius:13px;padding:1.3rem 1rem;text-align:center;cursor:pointer;transition:all .2s;color:var(--s4);font-size:.8rem}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--t5);background:var(--t0);color:var(--t7);transform:scale(1.01)}
+.drop-zone i{font-size:1.7rem;margin-bottom:.45rem;display:block;color:var(--t5)}
+
+/* ════════ COLLAPSIBLE CTX ════════ */
+.ctx-panel{flex-shrink:0;background:var(--ctx-bg);border-bottom:1px solid var(--border);overflow:hidden;transition:max-height .32s ease;max-height:0}
+.ctx-panel.open{max-height:360px;overflow-y:auto}
+.ctx-inner{padding:.85rem 1.1rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem}
+@media(min-width:768px){.ctx-inner{grid-template-columns:repeat(6,1fr)}}
+
+/* ════════ MODAL ════════ */
+.modal-ov{position:fixed;inset:0;background:rgba(11,30,28,.5);backdrop-filter:blur(5px);z-index:50;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-ov.open{display:flex;animation:ovIn .2s ease}
+.modal-box{background:var(--modal-bg);border:1px solid var(--border);border-radius:var(--r-xl);padding:1.4rem;width:100%;max-width:480px;box-shadow:var(--sh-lg);animation:mPop .26s cubic-bezier(.22,1.2,.4,1)}
+.modal-lg{max-width:720px;max-height:88vh;display:flex;flex-direction:column}
+@keyframes mPop{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes ovIn{from{opacity:0}to{opacity:1}}
+.modal-title{font-size:1.05rem;font-weight:700;color:var(--s9);display:flex;align-items:center;gap:.5rem;margin-bottom:.95rem}
+.modal-acts{display:flex;gap:.5rem;margin-top:.95rem}
+.mbt{flex:1;padding:.6rem;border-radius:11px;font-size:.875rem;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid var(--border);background:var(--card-bg);color:var(--s6);font-family:'Sarabun',sans-serif}
+.mbt:hover:not(:disabled){background:var(--sec-bg);transform:translateY(-1px);box-shadow:var(--sh-sm)}
+.mbt.vi{background:#7c3aed;color:#fff;border:none;display:flex;align-items:center;justify-content:center;gap:6px}
+.mbt.vi:hover:not(:disabled){background:#6d28d9}
+.mbt:disabled{opacity:.5;cursor:not-allowed}
+
+/* ════════ TOAST ════════ */
+#toast{position:fixed;bottom:1.4rem;right:1.4rem;z-index:200;background:var(--t7);color:#fff;padding:.65rem 1.15rem;border-radius:12px;font-size:.84rem;font-weight:600;box-shadow:0 14px 36px -10px rgba(0,0,0,.4);transform:translateY(80px) scale(.92);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);max-width:min(86vw,420px)}
+#toast.show{transform:translateY(0) scale(1);opacity:1}
+
+/* ════════ CALC TAB ════════ */
+.calc-wrap{flex:1;overflow-y:auto;padding:1.15rem;display:flex;flex-direction:column;gap:1.15rem}
+@media(min-width:960px){.calc-wrap{flex-direction:row;align-items:flex-start;gap:1.25rem}}
+.calc-col{display:flex;flex-direction:column;gap:1.15rem}
+@media(min-width:960px){.calc-col{flex:1}}
+.crcl-bar{height:12px;border-radius:99px;background:var(--border);margin:.65rem 0;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.12)}
+.crcl-fill{height:100%;border-radius:99px;transition:width .55s cubic-bezier(.4,1.2,.5,1),background .4s ease;background-image:linear-gradient(90deg,rgba(255,255,255,.25),transparent)}
+.crcl-result{font-size:1.85rem;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#0f766e,#14b8a6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+[data-theme="dark"] .crcl-result{background:linear-gradient(135deg,#2dd4bf,#5eead4);-webkit-background-clip:text;background-clip:text}
+.crcl-stage{font-size:.76rem;font-weight:700;padding:3px 10px;border-radius:99px;display:inline-block;margin-left:.4rem;box-shadow:var(--sh-xs)}
+.ckd1{background:#d1fae5;color:#065f46}.ckd2{background:#a7f3d0;color:#065f46}
+.ckd3a{background:#fef9c3;color:#713f12}.ckd3b{background:#fed7aa;color:#7c2d12}
+.ckd4{background:#fecaca;color:#7f1d1d}.ckd5{background:#fca5a5;color:#450a0a}
+[data-theme="dark"] .ckd1{background:#064e3b;color:#6ee7b7}[data-theme="dark"] .ckd2{background:#065f46;color:#a7f3d0}
+[data-theme="dark"] .ckd3a{background:#451a03;color:#fde68a}[data-theme="dark"] .ckd3b{background:#431407;color:#fdba74}
+[data-theme="dark"] .ckd4{background:#450a0a;color:#fca5a5}[data-theme="dark"] .ckd5{background:#3b0000;color:#f87171}
+
+/* ════════ AI DOSING CHAT ════════ */
+.dose-chat-area{display:flex;flex-direction:column;gap:.55rem;max-height:340px;overflow-y:auto;margin:.5rem 0;scroll-behavior:smooth;padding-right:3px}
+.dose-chat-bubble{border-radius:12px;padding:.6rem .8rem;font-size:.82rem;line-height:1.65}
+@media(prefers-reduced-motion:no-preference){.dose-chat-bubble{animation:bubbleIn .3s ease both}}
+.dose-chat-bubble.user{background:var(--grad-teal);color:#fff;border-radius:12px 4px 12px 12px;align-self:flex-end;max-width:90%;box-shadow:0 4px 12px -6px rgba(13,148,136,.5)}
+.dose-chat-bubble.user strong{color:#bdf5e4}
+.dose-chat-bubble.ai{background:var(--card-bg);border:1px solid var(--border);border-radius:4px 12px 12px 12px;max-width:100%;box-shadow:var(--sh-sm)}
+.dose-chat-bubble.err{background:var(--err-bg);border:1px solid var(--err-border);border-left:4px solid #f43f5e;color:var(--err-c);border-radius:10px}
+.dose-chip{font-size:.72rem;font-weight:600;padding:5px 11px;border-radius:99px;border:1px solid var(--border);background:var(--sec-bg);color:var(--s6);cursor:pointer;transition:all .15s;font-family:'Sarabun',sans-serif}
+.dose-chip:hover{background:var(--t0);border-color:var(--t5);color:var(--t7);transform:translateY(-2px);box-shadow:var(--sh-sm)}
+.dose-chip:active{transform:scale(.95)}
+.dose-empty{text-align:center;color:var(--s4);font-size:.8rem;padding:1.75rem .5rem;line-height:1.65}
+
+/* ════════ RENAL TABLE ════════ */
+.renal-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.renal-table th{background:var(--sec-bg);color:var(--s6);font-weight:700;padding:7px 9px;text-align:left;border-bottom:1.5px solid var(--border);font-size:.7rem;letter-spacing:.04em;text-transform:uppercase}
+.renal-table td{padding:7px 9px;border-bottom:.5px solid var(--border);vertical-align:top}
+.renal-table tr:last-child td{border-bottom:none}
+.renal-table tr:hover td{background:var(--sec-bg)}
+.dose-ok{color:#15803d;font-weight:600}.dose-warn{color:#b45309;font-weight:600}
+.dose-reduce{color:#dc2626;font-weight:600}
+.dose-avoid{color:#7f1d1d;font-weight:700;background:#fee2e2;padding:1.5px 6px;border-radius:5px}
+.filter-btn{padding:4px 11px;font-size:.7rem;font-weight:600;border-radius:99px;border:1px solid var(--border);background:var(--card-bg);color:var(--s6);cursor:pointer;transition:all .15s;font-family:'Sarabun',sans-serif;white-space:nowrap}
+.filter-btn:hover:not(.on){border-color:var(--t5);color:var(--t7)}
+.filter-btn.on{background:var(--t7);color:#fff;border-color:var(--t7);box-shadow:0 3px 10px -4px rgba(15,118,110,.6)}
+
+/* ════════ HISTORY ════════ */
+.hist-item{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:.8rem;display:flex;align-items:center;gap:.7rem;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .18s}
+.hist-item:hover{border-color:var(--t5);transform:translateX(3px);box-shadow:var(--sh-sm)}
+.hist-ico{width:38px;height:38px;background:var(--t0);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--t6);font-size:.88rem;flex-shrink:0}
+.hist-body{flex:1;min-width:0}
+.hist-label{font-size:.82rem;font-weight:700;color:var(--s8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-meta{font-size:.68rem;color:var(--s4);margin-top:2px}
+.hist-del{background:none;border:none;cursor:pointer;color:var(--s4);padding:5px;border-radius:6px;font-size:.75rem;flex-shrink:0;transition:all .15s}
+.hist-del:hover{background:var(--err-bg);color:#dc2626}
+#qrCanvas{display:flex;justify-content:center;padding:1rem 0}
+#qrCanvas canvas,#qrCanvas img{border-radius:10px;border:1px solid var(--border)}
+
+/* ════════ KEYFRAMES ════════ */
+@keyframes sheen{0%,72%{left:-30%}100%{left:130%}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes panelIn{from{transform:translateY(7px)}to{transform:none}}
+@keyframes cardIn{from{transform:translateY(16px) scale(.992)}to{transform:none}}
+@keyframes bubbleIn{from{transform:translateY(11px)}to{transform:none}}
+
+/* ════════ MOBILE ════════ */
+@media(max-width:767px){
+  .tabs{position:fixed;bottom:0;left:0;right:0;border-top:1px solid var(--border);border-bottom:none;box-shadow:0 -3px 16px -6px rgba(15,60,56,.18);z-index:25;height:var(--tbh);padding:0}
+  .tab-btn{font-size:.7rem;flex-direction:column;gap:.18rem;padding:.45rem .3rem}
+  .tab-btn i{font-size:1rem}
+  .tab-btn::after{bottom:auto;top:0;height:3px;border-radius:0 0 99px 99px}
+  .tbadge{display:none}
+  .panels{padding-bottom:var(--tbh)}
+  .review-wrap{padding:.85rem .85rem 1rem}
+  .calc-wrap{padding:.85rem}
+  .chat-bar{padding:.55rem .8rem}
+  .msgs{padding:.85rem}
+  #toast{bottom:calc(var(--tbh) + .85rem);right:50%;transform:translate(50%,80px) scale(.92)}
+  #toast.show{transform:translate(50%,0) scale(1)}
+}
+@media(prefers-reduced-motion:reduce){
+  .app-hd::after,.btn-main::after{display:none}
+  *{animation-duration:.001s!important}
+}
+@media print{
+  .app-hd,.tabs,.review-left,#toast,.modal-ov{display:none!important}
+  #panelR{display:block!important}.review-wrap{display:block!important}
+  body{background:#fff!important}
+}
+
+</style>
+</head>
+<!-- Anti-flash: ต้องอยู่ก่อน body render -->
+<script>
+(function(){const s=localStorage.getItem('theme'),d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(s==='dark'||(s===null&&d))document.documentElement.dataset.theme='dark';})();
+</script>
+<body>
+
+<!-- HEADER -->
+<header class="app-hd">
+  <div class="brand">
+    <div class="brand-ico"><i class="fa-solid fa-pills"></i></div>
+    <span class="brand-name">AI Clinical Pharmacist</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:.5rem">
+    <button class="dm-btn" id="dmBtn" onclick="toggleDarkMode()" title="สลับ Dark / Light Mode">
+      <i class="fa-solid fa-moon" id="dmIcon"></i>
+    </button>
+    <div class="model-pill"><span class="pdot"></span>gemini-3.1-flash-lite</div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn on" id="tabR" onclick="switchTab('review')">
+    <i class="fa-solid fa-file-medical"></i>
+    <span>วิเคราะห์รายการยา</span>
+    <span class="tbadge">Report</span>
+  </button>
+  <button class="tab-btn" id="tabC" onclick="switchTab('chat')">
+    <i class="fa-solid fa-comments"></i>
+    <span>ถาม-ตอบคลินิก</span>
+    <span class="tbadge" id="chatBadge">Chat</span>
+  </button>
+  <button class="tab-btn" id="tabK" onclick="switchTab('calc')">
+    <i class="fa-solid fa-calculator"></i>
+    <span>คำนวณขนาดยา</span>
+    <span class="tbadge">Calc</span>
+  </button>
+</div>
+
+<!-- PANELS -->
+<div class="panels">
+
+  <!-- PANEL 1: MEDICATION REVIEW -->
+  <div class="panel on" id="panelR">
+    <div class="review-wrap">
+      <div class="review-left">
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title"><i class="fa-solid fa-user-injured"></i> ข้อมูลผู้ป่วย</div>
+            <div style="display:flex;gap:.35rem">
+              <button onclick="openModal('modalExtract')" class="pill pill-vi" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-wand-magic-sparkles" style="font-size:.62rem"></i> สกัด/สแกน</button>
+              <button onclick="clearReview()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.62rem"></i> ล้าง</button>
+            </div>
+          </div>
+          <div class="card-bd fstack">
+            <div class="g2">
+              <div class="fg"><label class="lbl">อายุ (ปี)</label><div style="display:flex;gap:.3rem"><input type="number" id="age" class="inp" placeholder="65" min="0" oninput="calcCrCl()" style="flex:1"><button class="icon-btn ib-ghost" style="width:34px;height:34px;font-size:.75rem" onclick="toggleMic('age')" id="micAge"><i class="fa-solid fa-microphone"></i></button></div></div>
+              <div class="fg"><label class="lbl">เพศ</label><select id="sex" class="inp" onchange="togglePreg();calcCrCl()"><option value="">— เลือก —</option><option>ชาย</option><option>หญิง</option></select></div>
+              <div class="fg"><label class="lbl">น้ำหนัก (kg)</label><input type="number" id="weight" class="inp" placeholder="70" oninput="calcCrCl()"></div>
+              <div class="fg"><label class="lbl">ส่วนสูง (cm)</label><input type="number" id="height" class="inp" placeholder="165"></div>
+            </div>
+            <div class="fg"><label class="lbl">การวินิจฉัย / โรคร่วม<span class="req">*</span></label><textarea id="diagnosis" rows="2" class="inp" placeholder="T2DM, Hypertension, CKD stage 3"></textarea></div>
+            <div class="fg">
+              <label class="lbl" style="color:#b91c1c">⚠ ประวัติแพ้ยา</label>
+              <input type="text" id="allergies" class="inp inp-allergy" placeholder="Penicillin → ผื่น | หรือ 'ไม่มี'">
+              <div class="atags">
+                <button class="atag" onclick="pickA(this,'ไม่มีประวัติแพ้ยา')">ไม่มี</button>
+                <button class="atag" onclick="pickA(this,'Penicillin')">Penicillin</button>
+                <button class="atag" onclick="pickA(this,'Sulfa')">Sulfa</button>
+                <button class="atag" onclick="pickA(this,'NSAIDs')">NSAIDs</button>
+                <button class="atag" onclick="pickA(this,'Contrast')">Contrast</button>
+                <button class="atag" onclick="pickA(this,'Aspirin')">Aspirin</button>
+              </div>
+            </div>
+            <div class="sec-box fstack" style="gap:.6rem">
+              <div style="font-size:.67rem;font-weight:700;color:var(--s4);letter-spacing:.07em;text-transform:uppercase">Lab &amp; Organ Function</div>
+              <div class="g3">
+                <div class="fg"><label class="lbl">SCr (mg/dL) <span class="bdg bdg-blue">Renal</span></label><input type="text" id="scr" class="inp" placeholder="1.5" oninput="calcCrCl()"></div>
+                <div class="fg"><label class="lbl">CrCl (ml/min)</label><input type="text" id="crcl" class="inp" placeholder="คำนวณ/กรอก"><span class="calc-hint" id="crclHint"></span></div>
+                <div class="fg"><label class="lbl">Child-Pugh <span class="bdg bdg-amber">Liver</span></label><select id="cpugh" class="inp"><option value="">—</option><option value="A (5-6)">A (5-6)</option><option value="B (7-9)">B (7-9)</option><option value="C (10-15)">C (10-15)</option></select></div>
+              </div>
+              <div id="pregSec" style="display:none">
+                <div class="g2">
+                  <div class="fg"><label class="lbl">ไตรมาสการตั้งครรภ์</label><select id="trimester" class="inp"><option value="">ไม่ได้ตั้งครรภ์</option><option value="ไตรมาส 1 (1-12 สัปดาห์)">ไตรมาส 1</option><option value="ไตรมาส 2 (13-26 สัปดาห์)">ไตรมาส 2</option><option value="ไตรมาส 3 (27-40 สัปดาห์)">ไตรมาส 3</option></select></div>
+                  <div class="fg" style="justify-content:flex-end;padding-top:18px"><label class="cbw"><input type="checkbox" id="lact"> ให้นมบุตร <span class="bdg bdg-violet">LactMed</span></label></div>
+                </div>
+              </div>
+              <div id="pregFb" style="display:flex;gap:1rem"><label class="cbw"><input type="checkbox" id="pregCb"> ตั้งครรภ์</label><label class="cbw"><input type="checkbox" id="lactCb"> ให้นมบุตร</label></div>
+            </div>
+            <div class="fg">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+                <label class="lbl" style="margin-bottom:0">รายการยา<span class="req">*</span></label>
+                <div style="display:flex;gap:.3rem;align-items:center">
+                  <button class="icon-btn ib-ghost" style="width:30px;height:30px;font-size:.72rem" onclick="toggleMic('meds')" id="micMeds"><i class="fa-solid fa-microphone"></i></button>
+                  <label style="font-size:.67rem;color:var(--t7);cursor:pointer;display:flex;align-items:center;gap:3px;font-weight:600"><i class="fa-solid fa-image"></i> แนบรูป<input type="file" id="imgR" accept="image/*" style="display:none" onchange="handleImg(this,'review')"></label>
+                </div>
+              </div>
+              <textarea id="meds" rows="5" class="inp inp-mono" oninput="updMedCnt()" required placeholder="Metformin 500mg oral BD&#10;Amlodipine 5mg oral OD&#10;Simvastatin 20mg oral OD hs"></textarea>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px"><span style="font-size:.65rem;color:var(--s4)" id="medCnt">0 รายการ</span></div>
+              <div id="imgPreviewR" style="display:none;margin-top:.4rem"></div>
+            </div>
+            <div class="fg"><label class="lbl"><i class="fa-solid fa-leaf" style="color:#16a34a;font-size:.68rem"></i> อาหารเสริม / สมุนไพร</label><textarea id="supplements" rows="2" class="inp inp-mono" placeholder="Fish oil 1000mg OD&#10;Vitamin D3 2000IU OD"></textarea></div>
+            <div class="fg">
+              <label class="lbl">คำถามเพิ่มเติม</label>
+              <div style="display:flex;gap:.3rem;align-items:flex-start">
+                <textarea id="questions" rows="2" class="inp" style="flex:1" placeholder="เช่น ยาตัวใดควรระวังเป็นพิเศษ?"></textarea>
+                <button class="icon-btn ib-ghost" style="width:34px;height:34px;font-size:.75rem;flex-shrink:0" onclick="toggleMic('questions')" id="micQ"><i class="fa-solid fa-microphone"></i></button>
+              </div>
+            </div>
+            <button onclick="doReview()" id="reviewBtn" class="btn-main"><i class="fa-solid fa-magnifying-glass-chart"></i> วิเคราะห์รายการยา <span style="font-size:.68rem;opacity:.65">(Ctrl+Enter)</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="review-right">
+        <div class="card" style="min-height:420px;display:flex;flex-direction:column">
+          <div class="result-hd">
+            <div class="result-title"><i class="fa-solid fa-notes-medical"></i> ผลการวิเคราะห์</div>
+            <div style="display:flex;gap:.35rem;flex-wrap:wrap">
+              <button id="histBtn" class="pill pill-sl"><i class="fa-solid fa-clock-rotate-left" style="font-size:.62rem"></i> <span id="histCount">ประวัติ</span></button>
+              <button id="guideBtn" onclick="openGuide()" class="pill pill-vi" style="display:none"><i class="fa-solid fa-book-medical" style="font-size:.62rem"></i> คู่มือผู้ป่วย</button>
+              <button id="qrBtn" onclick="openQR('review')" class="pill pill-tl" style="display:none"><i class="fa-solid fa-share-nodes" style="font-size:.62rem"></i> แชร์/พิมพ์</button>
+              <button id="copyRevBtn" onclick="copyReview()" class="pill pill-sl" style="display:none"><i class="fa-regular fa-copy" style="font-size:.62rem"></i> คัดลอก</button>
+              <button id="printRevBtn" onclick="window.print()" class="pill pill-sl" style="display:none"><i class="fa-solid fa-print" style="font-size:.62rem"></i> พิมพ์</button>
+            </div>
+          </div>
+          <div style="flex:1;padding:1rem;overflow-y:auto">
+            <div class="empty-st" id="revEmpty">
+              <div class="empty-ico"><i class="fa-solid fa-flask-vial"></i></div>
+              <p style="font-weight:700;font-size:.92rem;color:var(--s6);margin-bottom:.3rem">พร้อมวิเคราะห์รายการยา</p>
+              <p style="font-size:.8rem;max-width:240px;line-height:1.6">กรอกข้อมูลผู้ป่วยและรายการยา แล้วกดปุ่มวิเคราะห์</p>
+              <div class="caps">
+                <span class="cap" style="background:#f0fdf4;color:#15803d;border-color:#bbf7d0">Drug Interactions</span>
+                <span class="cap" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe">Dose Adjustment</span>
+                <span class="cap" style="background:#fef3c7;color:#92400e;border-color:#fde68a">Renal/Hepatic</span>
+                <span class="cap" style="background:#fdf4ff;color:#7e22ce;border-color:#e9d5ff">Pregnancy/Lactation</span>
+                <span class="cap" style="background:#fff1f2;color:#be123c;border-color:#fecdd3">Allergy Alert</span>
+              </div>
+            </div>
+            <div class="loading-st" id="revLoading" style="display:none"><div class="loading-ring"></div><div style="text-align:center"><p id="revLoadTxt" style="font-weight:600;color:var(--s7);font-size:.9rem">AI กำลังวิเคราะห์...</p><p style="font-size:.75rem;color:var(--s4);margin-top:.2rem">15–45 วินาที</p></div></div>
+            <div class="err-box" id="revErr" style="display:none"></div>
+            <div class="md" id="revResult" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: CLINICAL CHAT -->
+  <div class="panel" id="panelC">
+    <div class="chat-wrap">
+      <div class="chat-hd">
+        <div class="chat-hd-title"><i class="fa-solid fa-comments"></i> ถาม-ตอบคลินิก (ปลายเปิด)</div>
+        <div style="display:flex;gap:.35rem;align-items:center">
+          <span id="chatMsgCount" style="font-size:.68rem;color:var(--s4)">0 ข้อความ</span>
+          <button onclick="toggleCtx()" class="pill pill-tl" id="ctxBtn" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-sliders" style="font-size:.6rem"></i> บริบทผู้ป่วย</button>
+          <button onclick="openQR('chat')" class="pill pill-tl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-share-nodes" style="font-size:.6rem"></i> แชร์/พิมพ์</button>
+          <button onclick="openSessionHistory('chat')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-clock-rotate-left" style="font-size:.6rem"></i> ประวัติ</button>
+          <button onclick="exportText('chat')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-download" style="font-size:.6rem"></i> Export</button>
+          <button onclick="copyLastAI()" class="pill pill-sl" id="copyChat" style="display:none;font-size:.67rem;padding:3px 8px"><i class="fa-regular fa-copy" style="font-size:.62rem"></i> คัดลอก</button>
+          <button onclick="clearChat()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-trash-can" style="font-size:.6rem"></i></button>
+        </div>
+      </div>
+      <div class="ctx-panel" id="ctxPanel">
+        <div class="ctx-inner">
+          <div class="fg"><label class="lbl">อายุ (ปี)</label><input type="number" id="cx-age" class="inp" placeholder="65" style="font-size:.8rem;padding:5px 8px"></div>
+          <div class="fg"><label class="lbl">เพศ</label><select id="cx-sex" class="inp" style="font-size:.8rem;padding:5px 8px"><option value="">—</option><option>ชาย</option><option>หญิง</option></select></div>
+          <div class="fg"><label class="lbl">SCr (mg/dL)</label><input type="text" id="cx-scr" class="inp" placeholder="1.5" style="font-size:.8rem;padding:5px 8px"></div>
+          <div class="fg"><label class="lbl">CrCl (ml/min)</label><input type="text" id="cx-crcl" class="inp" placeholder="45" style="font-size:.8rem;padding:5px 8px"></div>
+          <div class="fg"><label class="lbl">Child-Pugh</label><select id="cx-cp" class="inp" style="font-size:.8rem;padding:5px 8px"><option value="">—</option><option>A</option><option>B</option><option>C</option></select></div>
+          <div class="fg"><label class="lbl">แพ้ยา</label><input type="text" id="cx-allergy" class="inp" placeholder="ไม่มี" style="font-size:.8rem;padding:5px 8px"></div>
+        </div>
+        <div style="padding:0 1rem .5rem"><div class="fg"><label class="lbl">การวินิจฉัย</label><textarea id="cx-dx" rows="1" class="inp" placeholder="T2DM, CKD, HT" style="font-size:.8rem;padding:5px 8px;resize:none"></textarea></div></div>
+        <div style="padding:0 1rem .625rem"><div class="fg"><label class="lbl">รายการยา (ถ้ามี)</label><textarea id="cx-meds" rows="2" class="inp inp-mono" placeholder="Metformin 500mg BD" style="font-size:.75rem;padding:5px 8px;resize:none"></textarea></div></div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div id="imgBarC" class="img-bar" style="display:none">
+        <i class="fa-solid fa-image" style="color:#ca8a04;font-size:.85rem;flex-shrink:0"></i>
+        <div id="imgBarCInner" style="flex:1;display:flex;flex-wrap:wrap;gap:.35rem"></div>
+        <button onclick="clearImg('chat')" style="background:none;border:none;cursor:pointer;color:var(--s4);font-size:.8rem;flex-shrink:0">ลบรูป</button>
+      </div>
+      <div class="chat-bar">
+        <button class="icon-btn ib-ghost" id="micChat" onclick="toggleMic('chatInput')"><i class="fa-solid fa-microphone"></i></button>
+        <textarea id="chatInput" class="chat-ta" rows="1" placeholder="พิมพ์คำถาม หรือกดไมค์... (Enter=ส่ง, Shift+Enter=บรรทัดใหม่)" oninput="autoTA(this)" onkeydown="chatKey(event)"></textarea>
+        <label class="icon-btn ib-ghost" title="แนบรูปภาพ" style="cursor:pointer"><i class="fa-solid fa-paperclip"></i><input type="file" id="imgC" accept="image/*" style="display:none" onchange="handleImg(this,'chat')"></label>
+        <button class="icon-btn ib-primary" id="sendBtn" onclick="sendChat()"><i class="fa-solid fa-paper-plane" style="font-size:.78rem"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: DOSING CALCULATOR -->
+  <div class="panel" id="panelK">
+    <div class="calc-wrap">
+
+      <!-- LEFT: CrCl + AI Dosing Chat -->
+      <div class="calc-col">
+
+        <!-- CrCl Card -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title"><i class="fa-solid fa-kidneys"></i> คำนวณ CrCl / eGFR</div>
+            <div style="display:flex;gap:.3rem">
+              <button class="filter-btn on" id="fmCG" onclick="setFormula('CG')">Cockcroft-Gault</button>
+              <button class="filter-btn" id="fmEPI" onclick="setFormula('EPI')">CKD-EPI 2021</button>
+            </div>
+          </div>
+          <div class="card-bd fstack">
+            <div class="g2">
+              <div class="fg"><label class="lbl">อายุ (ปี)</label><input type="number" id="c-age" class="inp" placeholder="65" min="1" max="120" oninput="calcRenal()"></div>
+              <div class="fg"><label class="lbl">เพศ</label><select id="c-sex" class="inp" onchange="calcRenal()"><option value="">— เลือก —</option><option value="M">ชาย</option><option value="F">หญิง</option></select></div>
+              <div class="fg"><label class="lbl">น้ำหนัก (kg)</label><input type="number" id="c-wt" class="inp" placeholder="70" oninput="calcRenal()"></div>
+              <div class="fg"><label class="lbl">SCr (mg/dL)</label><input type="number" id="c-scr" class="inp" placeholder="1.0" step="0.1" oninput="calcRenal()"></div>
+              <div class="fg"><label class="lbl">ส่วนสูง (cm) <span style="color:var(--s4);font-size:.62rem">ใช้คำนวณ BSA/IBW</span></label><input type="number" id="c-ht" class="inp" placeholder="165" oninput="calcRenal()"></div>
+              <div class="fg"><label class="lbl">Child-Pugh <span class="bdg bdg-amber">Hepatic</span></label><select id="c-cpugh" class="inp" onchange="syncDoseCtx()"><option value="">—</option><option value="A">A (5-6)</option><option value="B">B (7-9)</option><option value="C">C (10-15)</option></select></div>
+            </div>
+            <div id="crclOut" style="display:none">
+              <div style="display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap">
+                <span class="crcl-result" id="crclVal">—</span>
+                <span style="font-size:.78rem;color:var(--s6)">ml/min</span>
+                <span class="crcl-stage" id="crclStage"></span>
+              </div>
+              <div class="crcl-bar"><div class="crcl-fill" id="crclFill"></div></div>
+              <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:.25rem">
+                <p style="font-size:.73rem;color:var(--s6)"><b>BSA:</b> <span id="bsaVal">—</span> m²</p>
+                <p style="font-size:.73rem;color:var(--s6)"><b>IBW:</b> <span id="ibwVal">—</span> kg</p>
+              </div>
+              <p id="crclNote" style="font-size:.75rem;color:var(--s6);line-height:1.55;margin-top:.2rem"></p>
+              <button onclick="copyToDoseCtx()" class="pill pill-tl" style="margin-top:.4rem;font-size:.68rem;padding:3px 9px">
+                <i class="fa-solid fa-arrow-down" style="font-size:.62rem"></i> ส่งข้อมูลไป AI Dosing
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Dosing Chat -->
+        <div class="card" style="flex:1">
+          <div class="card-hd">
+            <div class="card-title"><i class="fa-solid fa-robot"></i> AI คำนวณขนาดยา</div>
+            <div style="display:flex;gap:.3rem">
+              <button onclick="openQR('dose')" class="pill pill-tl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-share-nodes" style="font-size:.6rem"></i> แชร์/พิมพ์</button>
+              <button onclick="openSessionHistory('dose')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-clock-rotate-left" style="font-size:.6rem"></i> ประวัติ</button>
+              <button onclick="exportText('dose')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-download" style="font-size:.6rem"></i> Export</button>
+              <button onclick="clearDoseChat()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.6rem"></i> ล้าง</button>
+            </div>
+          </div>
+          <div class="card-bd" style="display:flex;flex-direction:column;gap:.625rem">
+            <!-- Status bar -->
+            <div id="doseCtxBar" style="display:none;font-size:.72rem;color:var(--t7);background:var(--t0);border:1px solid var(--t1);border-radius:7px;padding:.35rem .625rem;line-height:1.5"></div>
+
+            <!-- Suggestion chips — ครอบคลุม IV / ยาน้ำเด็ก / DDI / Renal / Hepatic -->
+            <div style="display:flex;flex-wrap:wrap;gap:.3rem">
+              <button class="dose-chip" onclick="sendDoseChip(this)">💉 IV + Compat ยาฉีด</button>
+              <button class="dose-chip" onclick="sendDoseChip(this)">🧒 ยาน้ำ/ไซรัปเด็ก</button>
+              <button class="dose-chip" onclick="sendDoseChip(this)">⚠️ เช็ค DDI ปฏิกิริยายา</button>
+              <button class="dose-chip" onclick="sendDoseChip(this)">🫘 ปรับขนาดโรคไต</button>
+              <button class="dose-chip" onclick="sendDoseChip(this)">🫀 ปรับขนาดโรคตับ</button>
+              <button class="dose-chip" onclick="sendDoseChip(this)">📊 TDM Vancomycin</button>
+              <button class="dose-chip" onclick="sendDoseChip(this)">🩸 Heparin protocol</button>
+              <button class="dose-chip" onclick="sendDoseChip(this)">🧠 Alteplase stroke</button>
+            </div>
+
+            <!-- Mini chat area -->
+            <div class="dose-chat-area" id="doseChatArea">
+              <div class="dose-empty" id="doseEmpty">
+                <i class="fa-solid fa-flask-vial" style="font-size:1.4rem;color:var(--border);display:block;margin-bottom:.5rem"></i>
+                ถามขนาดยาใดก็ได้ — ไม่จำกัดประเภทยา<br>
+                <span style="font-size:.73rem;line-height:1.7">
+                  💉 ยาฉีด + ตาราง IV Compatibility<br>
+                  🧒 ยาน้ำเด็ก: ชื่อยา + น้ำหนัก → ได้ ml ทันที<br>
+                  ⚠️ เช็ค DDI ยา + อาหารเสริม + สมุนไพร<br>
+                  🫘🫀 ปรับขนาดโรคไต/ตับ<br>
+                  📊 TDM, Obesity dosing, Renal replacement
+                </span>
+              </div>
+            </div>
+
+            <!-- Input -->
+            <div style="display:flex;gap:.3rem;align-items:flex-end">
+              <textarea id="doseInput" class="inp" rows="2" style="flex:1;resize:none;font-size:.83rem;min-height:54px;font-family:'Sarabun',sans-serif"
+                placeholder="เช่น: ยา Amoxicillin น้ำ เด็ก 12kg suspension 250mg/5ml คำนวณ ml ต่อครั้ง&#10;หรือ: Ceftriaxone IV compat กับ NSS ได้ไหม rate เท่าไหร่&#10;หรือ: Warfarin + Aspirin + Fish oil เช็ค DDI"
+                onkeydown="doseKey(event)"></textarea>
+              <div style="display:flex;flex-direction:column;gap:.3rem;flex-shrink:0">
+                <button class="icon-btn ib-ghost" onclick="toggleMic('doseInput')" id="micDose" style="width:36px;height:36px;font-size:.75rem"><i class="fa-solid fa-microphone"></i></button>
+                <button class="icon-btn ib-primary" id="doseSendBtn" onclick="sendDose()" style="width:36px;height:36px"><i class="fa-solid fa-paper-plane" style="font-size:.75rem"></i></button>
+              </div>
+            </div>
+            <p style="font-size:.65rem;color:var(--s4);text-align:center">Enter = ส่ง | Shift+Enter = ขึ้นบรรทัด</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: DDI Checker + Renal+Hepatic Table -->
+      <div class="calc-col" style="flex:1.3">
+
+        <!-- DDI Checker -->
+        <div class="card">
+          <div class="card-hd">
+            <div class="card-title"><i class="fa-solid fa-triangle-exclamation"></i> ตรวจสอบ Drug Interactions</div>
+            <button onclick="clearDDI()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.6rem"></i> ล้าง</button>
+          </div>
+          <div class="card-bd fstack" style="gap:.5rem">
+            <div class="g2">
+              <div class="fg">
+                <label class="lbl">ยา (คั่นด้วย , หรือขึ้นบรรทัดใหม่)</label>
+                <textarea id="ddi-drugs" rows="3" class="inp inp-mono" placeholder="Warfarin 5mg OD&#10;Aspirin 81mg OD&#10;Amiodarone 200mg OD"></textarea>
+              </div>
+              <div class="fg">
+                <label class="lbl">อาหารเสริม / สมุนไพร / อาหาร</label>
+                <textarea id="ddi-supps" rows="3" class="inp inp-mono" placeholder="Fish oil 1000mg OD&#10;กระเทียม (Garlic)&#10;น้ำเกรปฟรุต"></textarea>
+              </div>
+            </div>
+            <button onclick="checkDDI()" id="ddiBtn" class="btn-main" style="font-size:.85rem;padding:9px">
+              <i class="fa-solid fa-magnifying-glass"></i> ตรวจ Interactions
+            </button>
+            <div id="ddiResult" class="md" style="display:none;max-height:280px;overflow-y:auto;background:var(--sec-bg);border-radius:8px;padding:.625rem;font-size:.8rem"></div>
+            <div id="ddiLoading" style="display:none;text-align:center;padding:.75rem;color:var(--s4);font-size:.8rem">
+              <div class="loading-ring" style="width:28px;height:28px;border-width:3px;margin:0 auto .35rem"></div>กำลังตรวจสอบ...
+            </div>
+          </div>
+        </div>
+
+        <!-- AI: Dose Adjustment by drug (Renal + Hepatic) -->
+        <div class="card" style="flex:1;display:flex;flex-direction:column">
+          <div class="card-hd">
+            <div class="card-title"><i class="fa-solid fa-table-list"></i> Dose Adjustment: Renal + Hepatic</div>
+            <button onclick="clearRHResult()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.6rem"></i> ล้าง</button>
+          </div>
+          <div class="card-bd fstack" style="gap:.5rem">
+            <!-- Drug input -->
+            <div class="fg">
+              <label class="lbl">รายการยาที่ต้องการตรวจสอบ</label>
+              <textarea id="rh-drugs" rows="4" class="inp inp-mono"
+                placeholder="Metformin 500mg BD&#10;Enalapril 10mg OD&#10;Furosemide 40mg OD&#10;Simvastatin 20mg OD"></textarea>
+            </div>
+            <!-- Patient context (auto-fill from CrCl calculator) -->
+            <div style="font-size:.72rem;color:var(--t7);background:var(--t0);border:1px solid var(--t1);border-radius:7px;padding:.35rem .625rem;display:none" id="rhCtxBar"></div>
+            <div style="display:flex;gap:.35rem;flex-wrap:wrap;align-items:center">
+              <button onclick="rhFillFromCalc()" class="pill pill-tl" style="font-size:.68rem;padding:4px 10px">
+                <i class="fa-solid fa-arrow-up" style="font-size:.6rem"></i> ดึงค่า CrCl/CP จาก Calculator
+              </button>
+              <button onclick="doRHQuery()" id="rhBtn" class="btn-main" style="flex:1;font-size:.85rem;padding:9px">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> วิเคราะห์การปรับขนาดยา
+              </button>
+            </div>
+            <!-- Result -->
+            <div id="rhLoading" style="display:none;text-align:center;padding:.75rem;color:var(--s4);font-size:.8rem">
+              <div class="loading-ring" style="width:28px;height:28px;border-width:3px;margin:0 auto .35rem"></div>กำลังวิเคราะห์...
+            </div>
+            <div id="rhResult" class="md" style="display:none;max-height:calc(100vh - 480px);overflow-y:auto;background:var(--sec-bg);border-radius:8px;padding:.625rem;font-size:.8rem"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /panels -->
+
+<!-- MODAL: Extract/Scan -->
+<div id="modalExtract" class="modal-ov">
+  <div class="modal-box">
+    <div class="modal-title"><i class="fa-solid fa-wand-sparkles" style="color:#7c3aed"></i> สกัดข้อมูลจาก Note / รูปภาพ</div>
+    <div style="display:flex;background:var(--s1);border-radius:8px;padding:3px;margin-bottom:.75rem;gap:2px">
+      <button id="extTabText" onclick="switchExtTab('text')" style="flex:1;padding:6px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;background:var(--card-bg);color:var(--s8);font-family:'Sarabun',sans-serif"><i class="fa-solid fa-align-left" style="margin-right:3px"></i>วาง Text</button>
+      <button id="extTabImg" onclick="switchExtTab('img')" style="flex:1;padding:6px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;background:transparent;color:var(--s4);font-family:'Sarabun',sans-serif"><i class="fa-solid fa-camera" style="margin-right:3px"></i>สแกนรูปภาพ</button>
+    </div>
+    <div id="extPanelText">
+      <p style="font-size:.78rem;color:var(--s4);margin-bottom:.5rem">วาง Doctor Note — AI สกัดเฉพาะรายการยา</p>
+      <textarea id="rawNote" rows="6" class="inp" placeholder="วาง Doctor Note ที่นี่..."></textarea>
+      <div class="modal-acts"><button class="mbt" onclick="closeModal('modalExtract')">ยกเลิก</button><button class="mbt vi" onclick="doExtractText()" id="extractTextBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> สกัดรายการยา</button></div>
+    </div>
+    <div id="extPanelImg" style="display:none">
+      <p style="font-size:.78rem;color:var(--s4);margin-bottom:.5rem">อัปโหลดรูปใบสั่งยา / Lab — AI Auto-fill ข้อมูลทุกช่อง</p>
+      <div class="drop-zone" id="extractDZ" onclick="document.getElementById('extractImgInput').click()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+        <i class="fa-solid fa-cloud-arrow-up"></i><span>คลิกหรือลากรูปมาวางที่นี่</span><br><span style="font-size:.7rem">JPG, PNG, WEBP (ไม่เกิน 10MB)</span>
+      </div>
+      <input type="file" id="extractImgInput" accept="image/*" style="display:none" onchange="handleExtractImg(this)">
+      <div id="extractImgPreview" style="display:none;margin-top:.5rem;text-align:center">
+        <img id="extractImgThumb" style="max-height:130px;border-radius:8px;border:1px solid var(--border);max-width:100%">
+        <p id="extractImgName" style="font-size:.72rem;color:var(--s4);margin-top:.25rem"></p>
+        <button onclick="resetExtractImg()" style="font-size:.7rem;color:var(--s4);background:none;border:none;cursor:pointer;text-decoration:underline">เปลี่ยนรูป</button>
+      </div>
+      <div class="modal-acts"><button class="mbt" onclick="closeModal('modalExtract')">ยกเลิก</button><button class="mbt vi" onclick="doAutoFill()" id="autoFillBtn" disabled><i class="fa-solid fa-robot"></i> Auto-fill ทุกช่อง</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Patient Guide -->
+<div id="modalGuide" class="modal-ov">
+  <div class="modal-box modal-lg">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-shrink:0">
+      <div class="modal-title" style="margin-bottom:0"><i class="fa-solid fa-book-medical" style="color:#7c3aed"></i> คำแนะนำสำหรับผู้ป่วย</div>
+      <button onclick="closeModal('modalGuide')" style="background:none;border:none;cursor:pointer;color:var(--s4);font-size:1.1rem"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="guideContent" class="md" style="flex:1;overflow-y:auto;padding-right:4px"></div>
+    <div class="modal-acts" style="flex-shrink:0"><button class="mbt" onclick="copyGuide()"><i class="fa-regular fa-copy" style="font-size:.72rem"></i> คัดลอก</button><button class="mbt" onclick="closeModal('modalGuide')" style="flex:2">ปิด</button></div>
+  </div>
+</div>
+
+<!-- MODAL: History -->
+<div id="modalHistory" class="modal-ov">
+  <div class="modal-box modal-lg">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-shrink:0">
+      <div class="modal-title" style="margin-bottom:0"><i class="fa-solid fa-clock-rotate-left" style="color:var(--t6)"></i> ประวัติการวิเคราะห์</div>
+      <div style="display:flex;gap:.4rem;align-items:center">
+        <button onclick="clearAllHistory()" class="pill pill-sl" style="font-size:.67rem;color:#dc2626;border-color:#fecdd3"><i class="fa-solid fa-trash-can" style="font-size:.6rem"></i> ล้างทั้งหมด</button>
+        <button onclick="closeModal('modalHistory')" style="background:none;border:none;cursor:pointer;color:var(--s4);font-size:1.1rem"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div id="histList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;padding-right:2px;min-height:200px"></div>
+    <div class="modal-acts" style="flex-shrink:0;margin-top:.75rem"><button class="mbt" onclick="closeModal('modalHistory')">ปิด</button></div>
+  </div>
+</div>
+
+<!-- MODAL: Share (PDF / Label / Guide / Copy / Share) -->
+<div id="modalQR" class="modal-ov">
+  <div class="modal-box">
+    <div class="modal-title"><i class="fa-solid fa-share-nodes" style="color:var(--t6)"></i> แชร์ / บันทึก / พิมพ์</div>
+    <div id="qrSourceLabel" style="font-size:.75rem;color:var(--t7);font-weight:600;margin-bottom:.75rem;background:var(--t0);border-radius:6px;padding:4px 10px;display:inline-block"></div>
+    <p id="qrDesc" style="font-size:.78rem;color:var(--s6);margin-bottom:1rem;line-height:1.6"></p>
+    <!-- Preview ของเนื้อหาที่จะแชร์ -->
+    <div id="sharePreview" style="background:var(--sec-bg);border:1px solid var(--border);border-radius:8px;padding:.625rem;font-size:.75rem;color:var(--s6);max-height:120px;overflow-y:auto;margin-bottom:1rem;line-height:1.6;white-space:pre-wrap"></div>
+    <!-- Action buttons -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.45rem">
+      <button class="mbt" onclick="printLabel()"><i class="fa-solid fa-tag" style="font-size:.72rem;color:var(--t6)"></i> พิมพ์ฉลากยา</button>
+      <button class="mbt" onclick="exportGuidePDF()"><i class="fa-solid fa-book-medical" style="font-size:.72rem;color:#7c3aed"></i> คู่มือผู้ป่วย PDF</button>
+      <button class="mbt" onclick="exportPDF()"><i class="fa-solid fa-file-pdf" style="font-size:.72rem;color:#dc2626"></i> บันทึก PDF</button>
+      <button class="mbt" onclick="shareContent()"><i class="fa-solid fa-share-nodes" style="font-size:.72rem;color:#2563eb"></i> แชร์ (มือถือ)</button>
+    </div>
+    <div class="modal-acts" style="margin-top:.45rem">
+      <button class="mbt" onclick="copyQRText()" style="flex:2"><i class="fa-regular fa-copy" style="font-size:.72rem"></i> คัดลอกข้อความ</button>
+      <button class="mbt" onclick="closeModal('modalQR')">ปิด</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Session History (Chat / Dose) -->
+<div id="modalSession" class="modal-ov">
+  <div class="modal-box modal-lg">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-shrink:0">
+      <div class="modal-title" style="margin-bottom:0"><i class="fa-solid fa-clock-rotate-left" style="color:var(--t6)"></i> <span id="sessTitle">ประวัติ</span></div>
+      <div style="display:flex;gap:.4rem;align-items:center">
+        <button onclick="clearAllSession()" class="pill pill-sl" style="font-size:.67rem;color:#dc2626;border-color:#fecdd3"><i class="fa-solid fa-trash-can" style="font-size:.6rem"></i> ล้างทั้งหมด</button>
+        <button onclick="closeModal('modalSession')" style="background:none;border:none;cursor:pointer;color:var(--s4);font-size:1.1rem"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div id="sessList" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;padding-right:2px;min-height:200px"></div>
+    <div class="modal-acts" style="flex-shrink:0;margin-top:.75rem"><button class="mbt" onclick="closeModal('modalSession')">ปิด</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script>
+// ── INIT ──
+marked.setOptions({breaks:true,gfm:true});
+function safeHtml(md){return marked.parse(md||'').replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\sonerror\s*=/gi,' data-err=').replace(/javascript:/gi,'blocked:');}
+function callGAS(fn,...args){return new Promise((ok,fail)=>google.script.run.withSuccessHandler(ok).withFailureHandler(fail)[fn](...args));}
+
+// guard เผื่อโค้ดเก่าอ้างถึง (ป้องกัน ReferenceError ตอน exportPDF)
+var qrMode='med',qrMedSummary='';
+
+/* ════════════════════════════════════════════════════════════
+   PREVIEW / DEMO FALLBACK — ทำงานเฉพาะตอนเปิดไฟล์นอก Apps Script
+   (เช่น preview/ทดสอบ offline). ใน Apps Script จริง google.script
+   มีอยู่แล้ว บล็อกนี้จะถูกข้ามทั้งหมด — ปลอดภัย ไม่กระทบของจริง
+   ════════════════════════════════════════════════════════════ */
+(function(){
+  if(typeof google!=='undefined' && google.script && google.script.run) return;
+  const wait=(v,ms)=>new Promise(r=>setTimeout(()=>r(v),ms||900));
+  const REPORT=`# รายงานการทบทวนรายการยา (ตัวอย่าง Preview)
+
+> 🧪 นี่คือ **ข้อมูลตัวอย่าง** สำหรับดูหน้าตา UI เท่านั้น — เมื่อนำไฟล์กลับเข้า Google Apps Script จะเชื่อม Gemini จริงอัตโนมัติ
+
+## 1. สรุปประเด็นสำคัญ (Executive Summary)
+- **ความเสี่ยงสูงสุด:** Metformin ใน CKD (CrCl 38) — เสี่ยง lactic acidosis
+- **แนวทางหลัก:** ลดขนาด Metformin และติดตามการทำงานของไต
+
+## 2. Dose Adjustment — Renal
+| ยา | ขนาดปกติ | CrCl 30-59 | CrCl 15-29 | Dialyzable? |
+|:---|:---|:---|:---|:---|
+| Metformin | 1000mg BD | **ลด 50%** | หยุด | ใช่ |
+| Enalapril | 10mg OD | 5mg OD | 2.5mg OD | ใช่ |
+
+## 4. Drug-Drug Interactions
+| ยาคู่ 1 | ยาคู่ 2 | ความรุนแรง | การจัดการ |
+|:---|:---|:---|:---|
+| Enalapril | Spironolactone | 🟡 Moderate | ติดตาม K⁺ |
+
+> 📚 อ้างอิง: UpToDate, ADA 2024, KDIGO 2024`;
+  const CHAT=`จากบริบทผู้ป่วย CKD — แนะนำกลุ่ม **ACEi/ARB** เป็นอันดับแรก [KDIGO 2024]
+
+| ยา | ขนาดเริ่มต้น | ปรับตาม CrCl |
+|:---|:---|:---|
+| Enalapril | 5mg OD | ลดเมื่อ CrCl <30 |
+| Losartan | 50mg OD | ไม่ต้องปรับ |
+
+> 📚 อ้างอิง: KDIGO 2024, ACC/AHA 2023`;
+  const DOSE=`**ตัวอย่างการคำนวณ**
+
+\`\`\`
+Dose = 15 mg/kg × 72 kg = 1080 mg
+\`\`\`
+
+| สารน้ำ | เข้ากันได้ | หมายเหตุ |
+|:---|:---:|:---|
+| NSS 0.9% | ✅ | แนะนำ |
+| D5W | ✅ | ใช้ได้ |
+| RL | ⚠️ | ระวัง |
+
+> 📚 อ้างอิง: Lexicomp, Micromedex`;
+  const DDI=`## ผลการตรวจสอบ (ตัวอย่าง)
+| ยา/สาร 1 | ยา/สาร 2 | ความรุนแรง | การจัดการ |
+|:---|:---|:---:|:---|
+| Warfarin | Aspirin | 🔴 Major | เลี่ยง/ติดตาม INR |
+| Warfarin | Fish oil | 🟡 Moderate | ติดตามเลือดออก |
+
+> 📚 อ้างอิง: Lexicomp, Micromedex`;
+  const GUIDE=`# คำแนะนำการใช้ยา (ตัวอย่าง)
+## Metformin
+- **วิธีกิน:** กินพร้อม/หลังอาหาร เช้า-เย็น
+- **ข้อควรระวัง:** หากคลื่นไส้ ปวดกล้ามเนื้อมาก ให้พบแพทย์`;
+  const handlers={
+    analyzeMedications:()=>wait(REPORT,1400),
+    analyzeMedicationsWithImage:()=>wait(REPORT,1600),
+    consultClinical:()=>wait(CHAT,1100),
+    consultClinicalWithImage:()=>wait(CHAT,1300),
+    calcDosing:()=>wait(DOSE,1100),
+    checkDDI:()=>wait(DDI,1200),
+    autoFillFromImage:()=>wait(JSON.stringify({age:"68",sex:"ชาย",weight:"70",diagnosis:"T2DM, CKD",scr:"1.8",crcl:"38",medications:"Metformin 1000mg BD\\nEnalapril 10mg OD"}),1500),
+    extractMedicationsFromNote:()=>wait("Metformin 1000mg BD\\nEnalapril 10mg OD\\nSimvastatin 20mg OD hs",1100),
+    generatePatientGuide:()=>wait(GUIDE,1200),
+    generateGuideFromText:()=>wait(GUIDE,1200),
+    summarizeForQR:()=>wait("Metformin เช้า-เย็น หลังอาหาร\\nEnalapril เช้า\\n⚠ ติดตามการทำงานของไต",900),
+    generateDrugLabel:()=>wait(JSON.stringify([{name:"Metformin 1000mg",instruction:"กิน 1 เม็ด วันละ 2 ครั้ง หลังอาหาร",timing:"เช้า-เย็น",warning:"ระวังในผู้ป่วยโรคไต"}]),1100)
+  };
+  window.google={script:{run:(function(){
+    const ctx={_ok:null,_fail:null};
+    const api={withSuccessHandler(f){ctx._ok=f;return api;},withFailureHandler(f){ctx._fail=f;return api;}};
+    Object.keys(handlers).forEach(name=>{
+      api[name]=function(){const h=handlers[name];Promise.resolve(h?h.apply(null,arguments):wait('demo',600)).then(r=>ctx._ok&&ctx._ok(r)).catch(e=>ctx._fail&&ctx._fail(e));return api;};
+    });
+    return api;
+  })()}};
+})();
+
+// ── STATE ──
+let reviewRes='',guideCache='',chatHistory=[],doseHistory=[];
+let pendingImgs={review:null,chat:null};
+let extractImgData=null,isSending=false,isReviewing=false,isDoseSending=false;
+let ctxOpen=false,renalCatFilter='all',calcFormula='CG';
+let dosePatientCtx={};
+const ALL_PANELS=['panelR','panelC','panelK'],ALL_TABS=['tabR','tabC','tabK'];
+
+// ── DARK MODE ──
+let isDark=false;
+function applyTheme(dark,animate){
+  isDark=dark;
+  const root=document.documentElement;
+  if(!animate)root.style.setProperty('--dm-trn','none');
+  root.dataset.theme=dark?'dark':'light';
+  if(!animate)setTimeout(()=>root.style.removeProperty('--dm-trn'),50);
+  const icon=document.getElementById('dmIcon');
+  if(icon)icon.className=dark?'fa-solid fa-sun':'fa-solid fa-moon';
+  localStorage.setItem('theme',dark?'dark':'light');
+}
+function toggleDarkMode(){applyTheme(!isDark,true);toast(isDark?'🌙 Dark Mode':'☀️ Light Mode',isDark?'#0c1420':'#0f766e');}
+function initTheme(){const s=localStorage.getItem('theme'),d=window.matchMedia('(prefers-color-scheme: dark)').matches;applyTheme(s?s==='dark':d,false);}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{if(!localStorage.getItem('theme'))applyTheme(e.matches,true);});
+
+// ── TAB ──
+function switchTab(tab){
+  ALL_PANELS.forEach(id=>{const el=document.getElementById(id);el.classList.remove('on');el.style.display='none';});
+  ALL_TABS.forEach(id=>document.getElementById(id).classList.remove('on'));
+  const m={review:['panelR','tabR'],chat:['panelC','tabC'],calc:['panelK','tabK']};
+  const[pId,tId]=m[tab]||m.review;
+  const p=document.getElementById(pId);p.classList.add('on');p.style.display='flex';
+  document.getElementById(tId).classList.add('on');
+  if(tab==='chat')scrollMsgs();
+  if(tab==='calc'){updateHistCount();}
+}
+
+// ── REVIEW FORM ──
+function calcCrCl(){
+  const age=parseFloat(document.getElementById('age').value);
+  const wt=parseFloat(document.getElementById('weight').value);
+  const scr=parseFloat(document.getElementById('scr').value);
+  const sex=document.getElementById('sex').value;
+  const hint=document.getElementById('crclHint');
+  if(age>0&&wt>0&&scr>0&&sex){
+    let c=((140-age)*wt)/(72*scr)*(sex==='หญิง'?0.85:1);
+    c=Math.round(c*10)/10;
+    const el=document.getElementById('crcl');
+    if(!el.value)el.value=c;
+    hint.textContent='คำนวณ CG: '+c+' ml/min';
+  } else {hint.textContent='';}
+}
+function togglePreg(){const s=document.getElementById('sex').value;document.getElementById('pregSec').style.display=s==='หญิง'?'block':'none';document.getElementById('pregFb').style.display=s==='หญิง'?'none':'flex';}
+function pickA(btn,val){const el=document.getElementById('allergies');const on=btn.classList.contains('on');document.querySelectorAll('.atag').forEach(b=>b.classList.remove('on'));if(!on){btn.classList.add('on');el.value=val==='ไม่มีประวัติแพ้ยา'?val:(el.value.replace('ไม่มีประวัติแพ้ยา','').trim()?(el.value.includes(val)?el.value:el.value.trim()+', '+val):val);}}
+function updMedCnt(){const v=document.getElementById('meds').value.trim();document.getElementById('medCnt').textContent=(v?v.split('\n').filter(l=>l.trim()).length:0)+' รายการ';}
+function buildReviewCtx(){
+  const g=id=>document.getElementById(id);
+  const sex=g('sex').value;const isFem=sex==='หญิง';
+  const preg=isFem?(g('trimester').value||'ไม่ได้ตั้งครรภ์'):(g('pregCb').checked?'ใช่':'ไม่');
+  const lact=isFem?g('lact').checked:g('lactCb').checked;
+  const age=parseFloat(g('age').value),wt=parseFloat(g('weight').value),ht=parseFloat(g('height').value);
+  const bmi=(age&&wt&&ht)?(' | BMI: '+(wt/Math.pow(ht/100,2)).toFixed(1)+' kg/m²'):'';
+  const p=['=== ข้อมูลผู้ป่วย ==='];
+  p.push('อายุ: '+(g('age').value||'ไม่ระบุ')+' ปี | เพศ: '+(sex||'ไม่ระบุ')+' | น้ำหนัก: '+(g('weight').value||'ไม่ระบุ')+' kg | ส่วนสูง: '+(g('height').value||'ไม่ระบุ')+' cm'+bmi);
+  p.push('','=== การวินิจฉัย ===',g('diagnosis').value||'ไม่ระบุ');
+  p.push('','=== ประวัติแพ้ยา ===',g('allergies').value||'ไม่มี');
+  p.push('','=== Lab / อวัยวะ ===','SCr: '+(g('scr').value||'ไม่ระบุ')+' mg/dL | CrCl: '+(g('crcl').value||'ไม่ระบุ')+' ml/min | Child-Pugh: '+(g('cpugh').value||'ไม่ระบุ'),'ตั้งครรภ์: '+preg+' | ให้นมบุตร: '+(lact?'ใช่':'ไม่'));
+  p.push('','=== รายการยา ===',g('meds').value);
+  const sup=g('supplements').value.trim();if(sup)p.push('','=== อาหารเสริม ===',sup);
+  const q=g('questions').value.trim();if(q)p.push('','=== คำถามเพิ่มเติม ===',q);
+  return p.join('\n');
+}
+
+// ── REVIEW SUBMIT ──
+const REV_MSGS=['AI กำลังตรวจสอบรายการยา...','วิเคราะห์ Drug Interactions...','ตรวจสอบ Renal/Hepatic Dosing...','ประเมิน Pregnancy & Lactation...','ตรวจสอบ Guideline Compliance...','สรุป Monitoring Parameters...'];
+let revTimer=null;
+async function doReview(){
+  if(isReviewing)return;
+  if(!document.getElementById('meds').value.trim()){toast('⚠ กรุณาระบุรายการยาก่อน','#b45309');document.getElementById('meds').focus();return;}
+  isReviewing=true;guideCache='';
+  const btn=document.getElementById('reviewBtn');btn.disabled=true;btn.innerHTML='<div class="spin"></div> กำลังวิเคราะห์...';
+  showRevSt('loading');let mi=0;
+  revTimer=setInterval(()=>{mi=(mi+1)%REV_MSGS.length;document.getElementById('revLoadTxt').textContent=REV_MSGS[mi];},4200);
+  try{
+    const ctx=buildReviewCtx();let res;
+    if(pendingImgs.review)res=await callGAS('analyzeMedicationsWithImage',pendingImgs.review.b64,pendingImgs.review.mime,ctx);
+    else res=await callGAS('analyzeMedications',ctx);
+    reviewRes=res;document.getElementById('revResult').innerHTML=safeHtml(res);showRevSt('result');
+    ['guideBtn','copyRevBtn','printRevBtn','qrBtn'].forEach(id=>document.getElementById(id).style.display='inline-flex');
+    saveHistory(ctx,res);
+  }catch(e){showRevSt('error',e.message);}
+  finally{clearInterval(revTimer);isReviewing=false;btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-magnifying-glass-chart"></i> วิเคราะห์รายการยา <span style="font-size:.68rem;opacity:.65">(Ctrl+Enter)</span>';}
+}
+function showRevSt(state,msg){
+  ['revEmpty','revLoading','revErr','revResult'].forEach(id=>document.getElementById(id).style.display='none');
+  if(state==='loading')document.getElementById('revLoading').style.display='flex';
+  if(state==='result')document.getElementById('revResult').style.display='block';
+  if(state==='error'){document.getElementById('revErr').style.display='block';document.getElementById('revErr').textContent='❌ '+(msg||'เกิดข้อผิดพลาด');}
+  if(state==='empty')document.getElementById('revEmpty').style.display='flex';
+}
+async function copyReview(){try{await navigator.clipboard.writeText(reviewRes);toast('✓ คัดลอก Markdown แล้ว');}catch{toast('❌ คัดลอกไม่สำเร็จ','#dc2626');}}
+let guideLoading=false;
+async function openGuide(){if(guideLoading)return;openModal('modalGuide');if(guideCache){document.getElementById('guideContent').innerHTML=safeHtml(guideCache);return;}guideLoading=true;document.getElementById('guideContent').innerHTML='<div class="loading-st" style="min-height:160px"><div class="loading-ring" style="width:32px;height:32px;border-width:3px"></div></div>';try{const r=await callGAS('generatePatientGuide',document.getElementById('meds').value);guideCache=r;document.getElementById('guideContent').innerHTML=safeHtml(r);}catch(e){document.getElementById('guideContent').innerHTML='<div class="err-box">❌ '+e.message+'</div>';}finally{guideLoading=false;}}
+async function copyGuide(){try{await navigator.clipboard.writeText(document.getElementById('guideContent').innerText);toast('✓ คัดลอกคู่มือแล้ว');}catch{toast('❌ ไม่สำเร็จ','#dc2626');}}
+function clearReview(){['age','weight','height','diagnosis','allergies','scr','crcl','meds','supplements','questions'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['sex','cpugh','trimester'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['lact','pregCb','lactCb'].forEach(id=>{const e=document.getElementById(id);if(e)e.checked=false;});document.querySelectorAll('.atag').forEach(b=>b.classList.remove('on'));reviewRes='';guideCache='';clearImg('review');document.getElementById('crclHint').textContent='';updMedCnt();togglePreg();showRevSt('empty');['guideBtn','copyRevBtn','printRevBtn','qrBtn'].forEach(id=>document.getElementById(id).style.display='none');toast('✓ ล้างแบบฟอร์มแล้ว','#475569');}
+
+// ── IMAGE HANDLING ──
+function handleImg(input,target){const file=input.files[0];if(!file)return;if(!file.type.startsWith('image/')){toast('⚠ ต้องเป็นรูปภาพ','#b45309');return;}if(file.size>10*1024*1024){toast('⚠ เกิน 10MB','#b45309');return;}const reader=new FileReader();reader.onload=e=>{const url=e.target.result;pendingImgs[target]={b64:url.split(',')[1],mime:file.type,url,name:file.name};showImgPreview(target);};reader.readAsDataURL(file);input.value='';}
+function showImgPreview(target){const img=pendingImgs[target];if(!img)return;if(target==='review'){const d=document.getElementById('imgPreviewR');d.innerHTML=`<div class="img-pill"><img src="${img.url}" alt=""><span>${img.name}</span><button class="img-rm" onclick="clearImg('review')">✕</button></div>`;d.style.display='flex';}else if(target==='chat'){document.getElementById('imgBarCInner').innerHTML=`<div class="img-pill"><img src="${img.url}" alt=""><span>${img.name}</span></div>`;document.getElementById('imgBarC').style.display='flex';}}
+function clearImg(target){pendingImgs[target]=null;if(target==='review'){const d=document.getElementById('imgPreviewR');d.innerHTML='';d.style.display='none';}else if(target==='chat'){document.getElementById('imgBarCInner').innerHTML='';document.getElementById('imgBarC').style.display='none';}}
+function onDragOver(e){e.preventDefault();document.getElementById('extractDZ').classList.add('drag-over');}
+function onDragLeave(e){document.getElementById('extractDZ').classList.remove('drag-over');}
+function onDrop(e){e.preventDefault();document.getElementById('extractDZ').classList.remove('drag-over');const file=e.dataTransfer.files[0];if(file)processExtractFile(file);}
+function handleExtractImg(input){const file=input.files[0];if(!file)return;processExtractFile(file);input.value='';}
+function processExtractFile(file){if(!file.type.startsWith('image/')){toast('⚠ ต้องเป็นรูปภาพ','#b45309');return;}if(file.size>10*1024*1024){toast('⚠ เกิน 10MB','#b45309');return;}const reader=new FileReader();reader.onload=e=>{extractImgData={b64:e.target.result.split(',')[1],mime:file.type};document.getElementById('extractImgThumb').src=e.target.result;document.getElementById('extractImgName').textContent=file.name+' ('+Math.round(file.size/1024)+' KB)';document.getElementById('extractImgPreview').style.display='block';document.getElementById('extractDZ').style.display='none';document.getElementById('autoFillBtn').disabled=false;};reader.readAsDataURL(file);}
+function resetExtractImg(){extractImgData=null;document.getElementById('extractImgPreview').style.display='none';document.getElementById('extractDZ').style.display='block';document.getElementById('autoFillBtn').disabled=true;}
+function switchExtTab(tab){const isT=tab==='text';document.getElementById('extPanelText').style.display=isT?'block':'none';document.getElementById('extPanelImg').style.display=isT?'none':'block';document.getElementById('extTabText').style.background=isT?'var(--card-bg)':'transparent';document.getElementById('extTabText').style.color=isT?'var(--s8)':'var(--s4)';document.getElementById('extTabImg').style.background=isT?'transparent':'var(--card-bg)';document.getElementById('extTabImg').style.color=isT?'var(--s4)':'var(--s8)';}
+async function doExtractText(){const raw=document.getElementById('rawNote').value.trim();if(!raw){toast('⚠ กรุณาวางข้อความก่อน','#b45309');return;}const btn=document.getElementById('extractTextBtn');btn.disabled=true;btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> กำลังสกัด...';try{const res=await callGAS('extractMedicationsFromNote',raw);const el=document.getElementById('meds');el.value+=(el.value?'\n':'')+res.trim();document.getElementById('rawNote').value='';updMedCnt();closeModal('modalExtract');toast('✓ สกัดรายการยาสำเร็จ');}catch(e){toast('❌ '+e.message,'#dc2626');}finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-wand-magic-sparkles"></i> สกัดรายการยา';}}
+async function doAutoFill(){if(!extractImgData){toast('⚠ กรุณาเลือกรูปก่อน','#b45309');return;}const btn=document.getElementById('autoFillBtn');btn.disabled=true;btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> กำลังวิเคราะห์...';try{const raw=await callGAS('autoFillFromImage',extractImgData.b64,extractImgData.mime);const cleaned=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();let data;try{data=JSON.parse(cleaned);}catch{throw new Error('แปลง JSON ไม่สำเร็จ');}const g=id=>document.getElementById(id);if(data.age)g('age').value=data.age;if(data.sex&&(data.sex==='ชาย'||data.sex==='หญิง'))g('sex').value=data.sex;if(data.weight)g('weight').value=data.weight;if(data.height)g('height').value=data.height;if(data.diagnosis)g('diagnosis').value=data.diagnosis;if(data.allergies)g('allergies').value=data.allergies;if(data.scr)g('scr').value=data.scr;if(data.crcl)g('crcl').value=data.crcl;if(data.childpugh){const cp=data.childpugh.trim();if(cp==='A'||cp==='A (5-6)')g('cpugh').value='A (5-6)';else if(cp==='B'||cp==='B (7-9)')g('cpugh').value='B (7-9)';else if(cp==='C'||cp==='C (10-15)')g('cpugh').value='C (10-15)';}if(data.medications){const el=g('meds');el.value+=(el.value?'\n':'')+data.medications;updMedCnt();}if(data.supplements)g('supplements').value=data.supplements;togglePreg();calcCrCl();extractImgData=null;resetExtractImg();closeModal('modalExtract');toast('✓ Auto-fill สำเร็จ! กรุณาตรวจสอบก่อนวิเคราะห์');}catch(e){toast('❌ '+e.message,'#dc2626');}finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-robot"></i> Auto-fill ทุกช่อง';}}
+
+// ── CONTEXT PANEL (Chat) ──
+function toggleCtx(){ctxOpen=!ctxOpen;document.getElementById('ctxPanel').classList.toggle('open',ctxOpen);const btn=document.getElementById('ctxBtn');btn.style.background=ctxOpen?'var(--t0)':'';btn.style.color=ctxOpen?'var(--t7)':'';}
+function buildChatCtx(){const g=id=>document.getElementById(id);const o={};if(g('cx-age')?.value)o.age=g('cx-age').value;if(g('cx-sex')?.value)o.sex=g('cx-sex').value;if(g('cx-scr')?.value)o.scr=g('cx-scr').value;if(g('cx-crcl')?.value)o.crcl=g('cx-crcl').value;if(g('cx-cp')?.value)o.childpugh=g('cx-cp').value;if(g('cx-allergy')?.value)o.allergy=g('cx-allergy').value;if(g('cx-dx')?.value)o.diagnosis=g('cx-dx').value;if(g('cx-meds')?.value)o.meds=g('cx-meds').value;return o;}
+
+// ── CLINICAL CHAT ──
+async function sendChat(){
+  const input=document.getElementById('chatInput');const text=input.value.trim();const img=pendingImgs.chat;
+  if((!text&&!img)||isSending)return;
+  isSending=true;input.value='';autoTA(input);
+  const welcome=document.getElementById('chatWelcome');if(welcome)welcome.style.display='none';
+  const userMsg=text||(img?'[แนบรูปภาพ]':'');
+  chatHistory.push({role:'user',content:userMsg});appendBubble('user',userMsg,img?img.url:null);
+  const sentImg=img?{...img}:null;clearImg('chat');
+  const typId=showTyping('msgs');document.getElementById('sendBtn').disabled=true;
+  try{
+    const hJson=JSON.stringify(chatHistory),cJson=JSON.stringify(buildChatCtx());let res;
+    if(sentImg?.b64)res=await callGAS('consultClinicalWithImage',sentImg.b64,sentImg.mime,hJson,cJson);
+    else res=await callGAS('consultClinical',hJson,cJson);
+    removeTyping('msgs',typId);chatHistory.push({role:'assistant',content:res});appendBubble('ai',res,null);
+    updChatStat();
+    saveSession('chat');
+  }catch(e){removeTyping('msgs',typId);appendBubble('ai','❌ '+e.message,null,true);}
+  finally{isSending=false;document.getElementById('sendBtn').disabled=false;document.getElementById('copyChat').style.display='inline-flex';input.focus();}
+}
+function appendBubble(role,content,imgUrl,isErr){
+  const container=document.getElementById('msgs');
+  const row=document.createElement('div');row.className='msg-row'+(role==='user'?' user':'');
+  const av=document.createElement('div');av.className='msg-av '+(role==='user'?'usr':'ai');
+  av.innerHTML=role==='user'?'<i class="fa-solid fa-user" style="font-size:.65rem"></i>':'<i class="fa-solid fa-pills" style="font-size:.65rem"></i>';
+  const body=document.createElement('div');body.className='msg-body';
+  const bub=document.createElement('div');bub.className='bubble '+(role==='user'?'usr':(isErr?'err':'ai'));
+  if(imgUrl){const im=document.createElement('img');im.className='msg-img';im.src=imgUrl;im.onclick=()=>window.open(imgUrl,'_blank');bub.appendChild(im);if(content&&content!=='[แนบรูปภาพ]'){const t=document.createElement('div');t.style.marginTop='.3rem';t.textContent=content;bub.appendChild(t);}}
+  else if(role==='ai'&&!isErr){bub.classList.add('md');bub.innerHTML=safeHtml(content);}
+  else{bub.textContent=content;}
+  const now=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  const meta=document.createElement('div');meta.className='msg-meta';
+  if(role==='ai'&&!isErr){const cpBtn=document.createElement('button');cpBtn.className='cp-btn';cpBtn.innerHTML='<i class="fa-regular fa-copy"></i>';cpBtn.onclick=()=>navigator.clipboard.writeText(content).then(()=>toast('✓ คัดลอก')).catch(()=>{});meta.innerHTML=`<i class="fa-solid fa-robot" style="font-size:.58rem"></i> AI · ${now}`;meta.appendChild(cpBtn);}
+  else if(role==='user'){meta.innerHTML=`<i class="fa-solid fa-user" style="font-size:.58rem"></i> คุณ · ${now}`;}
+  else{meta.innerHTML=`<i class="fa-solid fa-circle-exclamation" style="font-size:.58rem"></i> Error · ${now}`;}
+  body.appendChild(bub);body.appendChild(meta);
+  if(role==='user'){row.appendChild(body);row.appendChild(av);}else{row.appendChild(av);row.appendChild(body);}
+  container.appendChild(row);scrollMsgs();
+}
+function showTyping(containerId){const id='tp-'+Date.now();const c=document.getElementById(containerId);const row=document.createElement('div');row.id=id;row.className='msg-row';row.innerHTML=`<div class="msg-av ai"><i class="fa-solid fa-pills" style="font-size:.65rem"></i></div><div class="msg-body"><div class="bubble ai"><div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div></div></div>`;c.appendChild(row);if(containerId==='msgs')scrollMsgs();else{const el=document.getElementById(containerId);if(el)el.scrollTop=el.scrollHeight;}return id;}
+function removeTyping(containerId,id){const el=document.getElementById(id);if(el)el.remove();}
+function scrollMsgs(){const m=document.getElementById('msgs');m.scrollTop=m.scrollHeight;}
+function updChatStat(){const ai=chatHistory.filter(m=>m.role==='assistant').length;document.getElementById('chatMsgCount').textContent=chatHistory.length+' ข้อความ';if(ai>0){const b=document.getElementById('chatBadge');b.textContent=ai;b.style.background='var(--t1)';b.style.color='var(--t7)';}}
+async function copyLastAI(){const last=[...chatHistory].reverse().find(m=>m.role==='assistant');if(!last)return;try{await navigator.clipboard.writeText(last.content);toast('✓ คัดลอกคำตอบล่าสุด');}catch{toast('❌ ไม่สำเร็จ','#dc2626');}}
+const WELCOME_HTML=`<div id="chatWelcome"><div class="chat-welcome"><div class="welcome-icon"><i class="fa-solid fa-flask-vial"></i></div><p style="font-weight:700;font-size:.95rem;color:var(--s7);margin-bottom:.35rem">AI ผู้ช่วยเภสัชกรคลินิก</p><p style="font-size:.8rem;color:var(--s4);line-height:1.6;max-width:320px;margin:0 auto">ถามคำถามได้เลย รองรับ<strong>รูปภาพ</strong>และ<strong>เสียงพูด</strong></p></div><div class="suggest-grid"><button class="sg-card" onclick="useSuggest(this)"><i class="fa-solid fa-heart-pulse"></i><strong>ยาความดันใน CKD</strong><span>ACEi/ARB พร้อมการปรับ dose ตาม CrCl</span></button><button class="sg-card" onclick="useSuggest(this)"><i class="fa-solid fa-droplet"></i><strong>เปรียบเทียบ SGLT2i</strong><span>ข้อบ่งชี้, ขนาดยา, ข้อห้าม</span></button><button class="sg-card" onclick="useSuggest(this)"><i class="fa-solid fa-syringe"></i><strong>Insulin ชนิดต่างๆ</strong><span>Profile, เวลาออกฤทธิ์, การปรับขนาด</span></button><button class="sg-card" onclick="useSuggest(this)"><i class="fa-solid fa-shield-heart"></i><strong>Statin ใน Hepatic</strong><span>Child-Pugh A/B/C dose adjustment</span></button><button class="sg-card" onclick="useSuggest(this)"><i class="fa-solid fa-triangle-exclamation"></i><strong>Warfarin DDI</strong><span>สำคัญ กลไก ระดับ การจัดการ</span></button><button class="sg-card" onclick="useSuggest(this)"><i class="fa-solid fa-baby"></i><strong>ยาในสตรีให้นมบุตร</strong><span>LactMed classification</span></button></div></div>`;
+const SQ_MAP={'ยาความดันใน CKD':'ยาความดันในผู้ป่วย CKD จะแนะนำเป็นตัวไหนได้บ้าง พร้อมเหตุผลและการปรับขนาดยาตาม CrCl แต่ละ tier','เปรียบเทียบ SGLT2i':'เปรียบเทียบ SGLT2i ทุกตัวที่มีในประเทศไทย ข้อบ่งชี้ ขนาดยา ข้อห้าม ผลต่อหัวใจ/ไต/น้ำหนัก','Insulin ชนิดต่างๆ':'อธิบาย Insulin แต่ละชนิด profile onset peak duration และหลักการปรับขนาดยา','Statin ใน Hepatic':'Statin แต่ละตัวปรับขนาดยาอย่างไรใน Hepatic impairment Child-Pugh A B C พร้อมตาราง','Warfarin DDI':'Warfarin Drug Interactions ที่พบบ่อย กลไก ระดับความรุนแรง 🔴🟡🟢 และการจัดการ','ยาในสตรีให้นมบุตร':'ยาแก้ปวดในสตรีให้นมบุตร อะไรปลอดภัย อ้างอิง LactMed พร้อม RID% และคำแนะนำ'};
+function useSuggest(btn){const k=btn.querySelector('strong')?.textContent?.trim();const q=SQ_MAP[k]||k;document.getElementById('chatInput').value=q;autoTA(document.getElementById('chatInput'));sendChat();}
+function initWelcome(){document.getElementById('msgs').innerHTML=WELCOME_HTML;}
+function clearChat(){chatHistory=[];pendingImgs.chat=null;clearImg('chat');initWelcome();document.getElementById('chatMsgCount').textContent='0 ข้อความ';document.getElementById('copyChat').style.display='none';const b=document.getElementById('chatBadge');b.textContent='Chat';b.style.background='';b.style.color='';if(window._curSessId)window._curSessId.chat=null;toast('✓ ล้างการสนทนาแล้ว','#475569');}
+
+// ══════════════════════════════
+// AI DOSING CALCULATOR (NEW)
+// ══════════════════════════════
+const DOSE_CHIPS_MAP={
+  '💉 IV + Compat ยาฉีด':
+    'แนะนำยาฉีดที่ใช้บ่อย พร้อมตาราง IV Compatibility กับ NSS/D5W/RL, concentration ที่ใช้ได้, rate of infusion, stability หลังผสม และข้อควรระวัง เช่น Phenytoin, Ceftriaxone, Vancomycin, Amphotericin B, Amiodarone, KCl, Furosemide',
+  '🧒 ยาน้ำ/ไซรัปเด็ก':
+    'คำนวณยาน้ำเด็กให้หน่อย เช่น Paracetamol น้ำ, Amoxicillin suspension ขนาด ml ต่อครั้งตามน้ำหนัก พร้อมสูตรคำนวณ dose (mg) → ml, max dose, วิธีกิน, และ stability ของยาน้ำเด็กหลังผสม',
+  '⚠️ เช็ค DDI ปฏิกิริยายา':
+    'ตรวจสอบปฏิกิริยาระหว่างยา (Drug-Drug Interaction) และยากับอาหารเสริม/สมุนไพร ที่ต้องการตรวจ พร้อม % โอกาสเกิด กลไก ระดับความรุนแรง และวิธีจัดการ',
+  '🫘 ปรับขนาดโรคไต':
+    'แนวทางปรับขนาดยาในผู้ป่วยโรคไต CKD ตาม CrCl tier (>60, 30-60, 15-30, <15, ESRD) พร้อมตาราง',
+  '🫀 ปรับขนาดโรคตับ':
+    'แนวทางปรับขนาดยาใน Hepatic impairment ตาม Child-Pugh A/B/C พร้อมตาราง และกลไกที่เกี่ยวข้อง',
+  '📊 TDM Vancomycin':
+    'คำนวณ Vancomycin AUC-guided dosing initial dose พร้อม monitoring TDM, target AUC 400-600 mg·h/L, timing ของ level และการปรับขนาดยา',
+  '🩸 Heparin protocol':
+    'UFH dosing protocol สำหรับ DVT/PE/ACS: loading bolus 80 units/kg + infusion 18 units/kg/hr คำนวณตาม kg พร้อมการปรับตาม aPTT nomogram',
+  '🧠 Alteplase stroke':
+    'Alteplase ใน acute ischemic stroke ขนาด 0.9mg/kg: คำนวณ total dose, bolus 10%, infusion 90% ใน 60 นาที พร้อม contraindications และการติดตาม',
+};
+
+function sendDoseChip(btn){
+  const k=btn.textContent.trim();
+  const q=DOSE_CHIPS_MAP[k]||k;
+  document.getElementById('doseInput').value=q;
+  sendDose();
+}
+
+function doseKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendDose();}}
+
+// ส่งข้อมูล context ไปยัง AI Dosing
+function copyToDoseCtx(){
+  const g=id=>document.getElementById(id);
+  const crclStr=document.getElementById('crclVal')?.textContent;
+  const ctx={};
+  if(g('c-age').value)ctx.age=g('c-age').value;
+  if(g('c-sex').value)ctx.sex=g('c-sex').value;
+  if(g('c-wt').value)ctx.weight=g('c-wt').value;
+  if(g('c-ht').value)ctx.height=g('c-ht').value;
+  if(g('c-scr').value)ctx.scr=g('c-scr').value;
+  if(crclStr&&crclStr!=='—')ctx.crcl=parseFloat(crclStr).toFixed(1);
+  if(g('c-cpugh').value)ctx.childpugh=g('c-cpugh').value;
+  if(document.getElementById('bsaVal')?.textContent!=='—')ctx.bsa=document.getElementById('bsaVal').textContent;
+  if(document.getElementById('ibwVal')?.textContent!=='—')ctx.ibw=document.getElementById('ibwVal').textContent;
+  dosePatientCtx=ctx;
+  syncDoseCtx();
+  toast('✓ ส่งข้อมูลไป AI Dosing แล้ว');
+}
+function syncDoseCtx(){
+  const bar=document.getElementById('doseCtxBar');
+  const cpugh=document.getElementById('c-cpugh')?.value;
+  if(cpugh&&dosePatientCtx)dosePatientCtx.childpugh=cpugh;
+  if(Object.keys(dosePatientCtx).length===0){bar.style.display='none';return;}
+  const parts=[];
+  if(dosePatientCtx.age)parts.push(dosePatientCtx.age+'ปี');
+  if(dosePatientCtx.sex)parts.push(dosePatientCtx.sex==='M'?'ชาย':'หญิง');
+  if(dosePatientCtx.weight)parts.push(dosePatientCtx.weight+'kg');
+  if(dosePatientCtx.crcl)parts.push('CrCl '+dosePatientCtx.crcl);
+  if(dosePatientCtx.childpugh)parts.push('Child-Pugh '+dosePatientCtx.childpugh);
+  if(dosePatientCtx.bsa)parts.push('BSA '+dosePatientCtx.bsa+'m²');
+  bar.textContent='🩺 บริบท: '+parts.join(' · ');
+  bar.style.display='block';
+}
+
+async function sendDose(){
+  if(isDoseSending)return;
+  const input=document.getElementById('doseInput');
+  const text=input.value.trim();
+  if(!text)return;
+  isDoseSending=true;
+  input.value='';
+  // Hide empty state
+  const empty=document.getElementById('doseEmpty');
+  if(empty)empty.style.display='none';
+  // Append user bubble
+  appendDoseBubble('user',text);
+  doseHistory.push({role:'user',content:text});
+  // Typing
+  const area=document.getElementById('doseChatArea');
+  const typId='dt-'+Date.now();
+  const typRow=document.createElement('div');typRow.id=typId;typRow.className='dose-chat-bubble ai';
+  typRow.innerHTML='<div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  area.appendChild(typRow);area.scrollTop=area.scrollHeight;
+  document.getElementById('doseSendBtn').disabled=true;
+  try{
+    const hJson=JSON.stringify(doseHistory);
+    const cJson=JSON.stringify(dosePatientCtx);
+    const res=await callGAS('calcDosing',hJson,cJson);
+    const typEl=document.getElementById(typId);if(typEl)typEl.remove();
+    doseHistory.push({role:'assistant',content:res});
+    appendDoseBubble('ai',res);
+    saveSession('dose');
+  }catch(e){
+    const typEl=document.getElementById(typId);if(typEl)typEl.remove();
+    appendDoseBubble('ai','❌ '+e.message,true);
+  }finally{
+    isDoseSending=false;
+    document.getElementById('doseSendBtn').disabled=false;
+    input.focus();
+  }
+}
+
+function appendDoseBubble(role,content,isErr){
+  const area=document.getElementById('doseChatArea');
+  const bub=document.createElement('div');
+  bub.className='dose-chat-bubble '+(role==='user'?'user':(isErr?'err':'ai'));
+  if(role==='ai'&&!isErr){bub.classList.add('md');bub.innerHTML=safeHtml(content);}
+  else{bub.textContent=content;}
+  // Copy button for AI
+  if(role==='ai'&&!isErr){
+    const cp=document.createElement('button');
+    cp.style.cssText='background:none;border:none;cursor:pointer;color:var(--s4);font-size:.65rem;padding:2px 4px;border-radius:3px;display:block;margin-top:.25rem';
+    cp.innerHTML='<i class="fa-regular fa-copy"></i> คัดลอก';
+    cp.onclick=()=>navigator.clipboard.writeText(content).then(()=>toast('✓ คัดลอกแล้ว')).catch(()=>{});
+    bub.appendChild(cp);
+  }
+  area.appendChild(bub);
+  area.scrollTop=area.scrollHeight;
+}
+
+function clearDoseChat(){
+  doseHistory=[];dosePatientCtx={};
+  if(window._curSessId)window._curSessId.dose=null;
+  document.getElementById('doseCtxBar').style.display='none';
+  const area=document.getElementById('doseChatArea');
+  area.innerHTML='<div class="dose-empty" id="doseEmpty"><i class="fa-solid fa-flask-vial" style="font-size:1.4rem;color:var(--border);display:block;margin-bottom:.5rem"></i>ถามขนาดยาใดก็ได้ — ไม่จำกัดประเภทยา<br><span style="font-size:.73rem;line-height:1.7">💉 ยาฉีด + IV Compatibility<br>🧒 ยาน้ำเด็ก: ชื่อยา + น้ำหนัก → ได้ ml<br>⚠️ เช็ค DDI ยา + อาหารเสริม + สมุนไพร<br>🫘🫀 ปรับขนาดโรคไต/ตับ</span></div>';
+  toast('✓ ล้าง AI Dosing แล้ว','#475569');
+}
+
+// ══════════════════════════════
+// CrCl CALCULATOR
+// ══════════════════════════════
+function setFormula(f){calcFormula=f;document.getElementById('fmCG').classList.toggle('on',f==='CG');document.getElementById('fmEPI').classList.toggle('on',f==='EPI');calcRenal();}
+function calcRenal(){
+  const age=parseFloat(document.getElementById('c-age').value);
+  const sex=document.getElementById('c-sex').value;
+  const wt=parseFloat(document.getElementById('c-wt').value);
+  const scr=parseFloat(document.getElementById('c-scr').value);
+  const ht=parseFloat(document.getElementById('c-ht').value);
+  const out=document.getElementById('crclOut');
+  if(!age||!sex||!wt||!scr){out.style.display='none';return;}
+  out.style.display='block';
+  let crcl=0;
+  if(calcFormula==='CG'){
+    crcl=((140-age)*wt)/(72*scr)*(sex==='F'?0.85:1);
+  } else {
+    const k=sex==='F'?0.7:0.9,a=sex==='F'?-0.241:-0.302;
+    const ratio=scr/k;
+    crcl=142*Math.pow(Math.min(ratio,1),a)*Math.pow(Math.max(ratio,1),-1.200)*Math.pow(0.9938,age)*(sex==='F'?1.012:1);
+  }
+  crcl=Math.max(0,Math.round(crcl*10)/10);
+  document.getElementById('crclVal').textContent=crcl.toFixed(1);
+  // BSA (Mosteller)
+  let bsaTxt='—',ibwTxt='—';
+  if(ht>0&&wt>0){
+    const bsa=Math.sqrt((ht*wt)/3600);bsaTxt=bsa.toFixed(2);
+    const ibw=sex==='F'?(45.5+0.9*(ht-152.4)):(50+0.9*(ht-152.4));
+    ibwTxt=Math.max(ibw,0).toFixed(1);
+  }
+  document.getElementById('bsaVal').textContent=bsaTxt;document.getElementById('ibwVal').textContent=ibwTxt;
+  // Stage
+  let stage,cls,note,pct;
+  if(crcl>=90){stage='G1 (≥90)';cls='ckd1';note='ปกติ/สูง ยังไม่ต้องปรับยาส่วนใหญ่';pct=100;}
+  else if(crcl>=60){stage='G2 (60-89)';cls='ckd2';note='เสื่อมเล็กน้อย ยังไม่ต้องปรับยาส่วนใหญ่';pct=75;}
+  else if(crcl>=45){stage='G3a (45-59)';cls='ckd3a';note='เริ่มปรับ Metformin, ระวัง nephrotoxic drugs';pct=55;}
+  else if(crcl>=30){stage='G3b (30-44)';cls='ckd3b';note='ปรับยาหลายชนิด ระวัง NSAIDs/contrast';pct=38;}
+  else if(crcl>=15){stage='G4 (15-29)';cls='ckd4';note='ปรับยาอย่างระมัดระวัง หลีกเลี่ยง Metformin/NSAID';pct=22;}
+  else{stage='G5 (<15)/ESRD';cls='ckd5';note='ไตวายระยะสุดท้าย ยาส่วนใหญ่ต้องปรับหรือหลีกเลี่ยง';pct=8;}
+  document.getElementById('crclStage').textContent='CKD '+stage;document.getElementById('crclStage').className='crcl-stage '+cls;
+  document.getElementById('crclFill').style.width=pct+'%';
+  document.getElementById('crclFill').style.background=pct>70?'#22c55e':pct>40?'#f59e0b':pct>20?'#ef4444':'#7f1d1d';
+  document.getElementById('crclNote').textContent=note;
+
+}
+// copyFromCrCl replaced by rhFillFromCalc
+
+// ══════════════════════════════
+// DDI CHECKER
+// ══════════════════════════════
+async function checkDDI(){
+  const drugs=document.getElementById('ddi-drugs')?.value.trim();
+  if(!drugs){toast('⚠ กรุณาระบุรายการยาก่อน','#b45309');return;}
+  const supps=document.getElementById('ddi-supps')?.value.trim()||'';
+  const btn=document.getElementById('ddiBtn');btn.disabled=true;btn.innerHTML='<div class="spin"></div> กำลังตรวจสอบ...';
+  const ld=document.getElementById('ddiLoading'),rs=document.getElementById('ddiResult');
+  ld.style.display='block';rs.style.display='none';
+  try{const res=await callGAS('checkDDI',drugs,supps);rs.innerHTML=safeHtml(res);rs.style.display='block';}
+  catch(e){rs.innerHTML='<div class="err-box">❌ '+e.message+'</div>';rs.style.display='block';}
+  finally{ld.style.display='none';btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-magnifying-glass"></i> ตรวจ Interactions';}
+}
+function clearDDI(){['ddi-drugs','ddi-supps'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['ddiResult','ddiLoading'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});}
+
+
+// ══════════════════════════════
+// AI DOSE ADJUSTMENT — Renal + Hepatic
+// ══════════════════════════════
+let rhPatientCtx={};
+
+function rhFillFromCalc(){
+  const g=id=>document.getElementById(id);
+  const crcl=g('crclVal')?.textContent;
+  const ctx={};
+  if(g('c-age')?.value)   ctx.age=g('c-age').value;
+  if(g('c-sex')?.value)   ctx.sex=g('c-sex').value==='M'?'ชาย':'หญิง';
+  if(g('c-wt')?.value)    ctx.weight=g('c-wt').value;
+  if(crcl&&crcl!=='—')    ctx.crcl=parseFloat(crcl).toFixed(1);
+  if(g('c-scr')?.value)   ctx.scr=g('c-scr').value;
+  if(g('c-cpugh')?.value) ctx.childpugh=g('c-cpugh').value;
+  rhPatientCtx=ctx;
+  const bar=document.getElementById('rhCtxBar');
+  if(bar&&Object.keys(ctx).length){
+    const parts=[];
+    if(ctx.age)parts.push(ctx.age+'ปี');
+    if(ctx.sex)parts.push(ctx.sex);
+    if(ctx.weight)parts.push(ctx.weight+'kg');
+    if(ctx.crcl)parts.push('CrCl '+ctx.crcl+' ml/min');
+    if(ctx.childpugh)parts.push('Child-Pugh '+ctx.childpugh);
+    bar.textContent='🩺 บริบทผู้ป่วย: '+parts.join(' · ');
+    bar.style.display='block';
+    toast('✓ ดึงค่า CrCl/CP แล้ว');
+  } else {
+    toast('⚠ คำนวณ CrCl ก่อนแล้วกดดึงค่า','#b45309');
+  }
+}
+
+async function doRHQuery(){
+  const drugs=document.getElementById('rh-drugs')?.value.trim();
+  if(!drugs){toast('⚠ กรุณาระบุรายการยาก่อน','#b45309');return;}
+  const btn=document.getElementById('rhBtn');
+  btn.disabled=true;btn.innerHTML='<div class="spin"></div> กำลังวิเคราะห์...';
+  document.getElementById('rhLoading').style.display='block';
+  document.getElementById('rhResult').style.display='none';
+  const ctx=rhPatientCtx;
+  let question='วิเคราะห์การปรับขนาดยาในผู้ป่วยที่มีความบกพร่องของไต และ/หรือตับ สำหรับยาต่อไปนี้:\n'+drugs;
+  if(Object.keys(ctx).length){
+    question+='\n\nข้อมูลผู้ป่วย:';
+    if(ctx.age)       question+='\nอายุ: '+ctx.age+' ปี';
+    if(ctx.sex)       question+='\nเพศ: '+ctx.sex;
+    if(ctx.weight)    question+='\nน้ำหนัก: '+ctx.weight+' kg';
+    if(ctx.crcl)      question+='\nCrCl: '+ctx.crcl+' ml/min';
+    if(ctx.scr)       question+='\nSCr: '+ctx.scr+' mg/dL';
+    if(ctx.childpugh) question+='\nChild-Pugh: '+ctx.childpugh;
+  }
+  question+='\n\nสร้างตารางแสดง Renal dose adjustment (CrCl >60/30-60/15-30/<15/ESRD) และ Hepatic dose adjustment (Child-Pugh A/B/C) สำหรับยาแต่ละตัว พร้อมขนาดยาที่แนะนำ % reduction และข้อควรระวัง';
+  try{
+    const hJson=JSON.stringify([{role:'user',content:question}]);
+    const cJson=JSON.stringify(ctx);
+    const res=await callGAS('calcDosing',hJson,cJson);
+    document.getElementById('rhResult').innerHTML=safeHtml(res);
+    document.getElementById('rhResult').style.display='block';
+  }catch(e){
+    document.getElementById('rhResult').innerHTML='<div class="err-box">❌ '+e.message+'</div>';
+    document.getElementById('rhResult').style.display='block';
+  }finally{
+    document.getElementById('rhLoading').style.display='none';
+    btn.disabled=false;
+    btn.innerHTML='<i class="fa-solid fa-magnifying-glass-chart"></i> วิเคราะห์การปรับขนาดยา';
+  }
+}
+
+function clearRHResult(){
+  const d=document.getElementById('rh-drugs');if(d)d.value='';
+  document.getElementById('rhResult').style.display='none';
+  document.getElementById('rhLoading').style.display='none';
+  document.getElementById('rhCtxBar').style.display='none';
+  rhPatientCtx={};
+}
+
+// ══════════════════════════════
+// HISTORY
+// ══════════════════════════════
+const HIST_KEY='pharma_hist_v2',MAX_HIST=10;
+function extractLabel(ctx){const age=(ctx.match(/อายุ:\s*([\d]+)/)||[])[1]||'';const sex=(ctx.match(/เพศ:\s*(\S+)/)||[])[1]||'';const dx=(ctx.match(/=== การวินิจฉัย ===\n([^\n]+)/)||[])[1]||'';const p=[];if(sex)p.push(sex);if(age)p.push(age+'ปี');if(dx)p.push(dx.substring(0,40));return p.join(' | ')||'รายการยา';}
+function extractMedList(ctx){const m=ctx.match(/=== รายการยา ===\n([\s\S]+?)(?:\n===|$)/);return m?m[1].trim():'';}
+function saveHistory(ctx,result){let items=getHistory();const item={id:Date.now(),ts:new Date().toISOString(),label:extractLabel(ctx),meds:extractMedList(ctx),ctx,result};items.unshift(item);if(items.length>MAX_HIST)items=items.slice(0,MAX_HIST);try{localStorage.setItem(HIST_KEY,JSON.stringify(items));}catch(e){}updateHistCount();}
+function getHistory(){try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]');}catch{return[];}}
+function updateHistCount(){const n=getHistory().length;const el=document.getElementById('histCount');if(el)el.textContent=n>0?'ประวัติ ('+n+')':'ประวัติ';}
+function fmtDate(iso){try{const d=new Date(iso);return d.toLocaleDateString('th-TH',{day:'2-digit',month:'short'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}catch{return iso;}}
+function renderHistoryList(){const items=getHistory();const el=document.getElementById('histList');if(!items.length){el.innerHTML='<div class="empty-st" style="min-height:120px"><i class="fa-solid fa-clock-rotate-left" style="font-size:1.8rem;color:var(--border);margin-bottom:.5rem"></i><p style="font-size:.85rem;color:var(--s4)">ยังไม่มีประวัติ</p></div>';return;}el.innerHTML=items.map(item=>`<div class="hist-item" onclick="restoreHistory(${item.id})"><div class="hist-ico"><i class="fa-solid fa-notes-medical"></i></div><div class="hist-body"><div class="hist-label">${item.label}</div><div class="hist-meta"><i class="fa-regular fa-clock" style="font-size:.6rem"></i> ${fmtDate(item.ts)}${item.meds?'&nbsp;·&nbsp;'+item.meds.split('\n').filter(Boolean).length+' รายการ':''}</div></div><button class="hist-del" onclick="deleteHistory(event,${item.id})"><i class="fa-solid fa-xmark"></i></button></div>`).join('');}
+function restoreHistory(id){const item=getHistory().find(h=>h.id===id);if(!item)return;reviewRes=item.result;guideCache='';document.getElementById('revResult').innerHTML=safeHtml(item.result);showRevSt('result');['guideBtn','copyRevBtn','printRevBtn','qrBtn'].forEach(i=>document.getElementById(i).style.display='inline-flex');const g=id2=>document.getElementById(id2);if(item.meds)g('meds').value=item.meds;const age=(item.ctx.match(/อายุ:\s*([\d]+)/)||[])[1];if(age)g('age').value=age;const dx=(item.ctx.match(/=== การวินิจฉัย ===\n([^\n]+)/)||[])[1];if(dx)g('diagnosis').value=dx;updMedCnt();closeModal('modalHistory');switchTab('review');toast('✓ Restore สำเร็จ!');}
+function deleteHistory(e,id){e.stopPropagation();localStorage.setItem(HIST_KEY,JSON.stringify(getHistory().filter(h=>h.id!==id)));updateHistCount();renderHistoryList();}
+function clearAllHistory(){if(!confirm('ลบประวัติทั้งหมด?'))return;localStorage.removeItem(HIST_KEY);updateHistCount();renderHistoryList();toast('✓ ล้างประวัติทั้งหมดแล้ว','#475569');}
+
+// ══════════════════════════════
+// QR CODE — รองรับ review/chat/dosing
+// ══════════════════════════════
+let qrSource='review',qrCurrentText='';
+
+function openQR(source){
+  qrSource=source||'review';
+  const lb=document.getElementById('qrSourceLabel');
+  if(lb)lb.textContent=qrSource==='review'?'📋 วิเคราะห์รายการยา':qrSource==='chat'?'💬 ถาม-ตอบคลินิก':'🧮 คำนวณขนาดยา';
+  const desc=document.getElementById('qrDesc');
+  // ดึงเนื้อหาตาม context
+  let preview='';
+  if(qrSource==='review'){
+    const meds=document.getElementById('meds')?.value.trim()||'';
+    qrCurrentText=reviewRes||meds;
+    preview=meds?('รายการยา:\n'+meds):'(ยังไม่มีรายการยา)';
+    if(desc)desc.textContent='ฉลากยา/คู่มือ จะใช้รายการยา + ผลวิเคราะห์ในหน้านี้';
+  }else{
+    const src=getShareSource();
+    qrCurrentText=src.text;
+    preview=src.text?src.text.substring(0,400)+(src.text.length>400?'...':''):'('+src.emptyMsg+')';
+    if(desc)desc.textContent='ฉลากยา/คู่มือ จะดึงจาก'+(qrSource==='dose'?'ผลการคำนวณ':'คำตอบคลินิก')+' AI ล่าสุด (ใช้ขนาดที่ปรับแล้ว)';
+  }
+  const pv=document.getElementById('sharePreview');
+  if(pv)pv.textContent=preview.replace(/[#*`|>]/g,'');
+  openModal('modalQR');
+}
+
+async function copyQRText(){
+  const src=getShareSource();
+  const txt=qrSource==='review'?(reviewRes||document.getElementById('meds')?.value||''):src.text;
+  if(!txt){toast('⚠ ไม่มีเนื้อหา','#b45309');return;}
+  try{await navigator.clipboard.writeText(txt);toast('✓ คัดลอกแล้ว');}catch{toast('❌ ไม่สำเร็จ','#dc2626');}
+}
+
+// ── Web Share API (ฟรี, มือถือ) ──
+async function shareContent(){
+  const src=getShareSource();
+  const txt=qrSource==='review'?(reviewRes||document.getElementById('meds')?.value||''):src.text;
+  if(!txt){toast('⚠ ไม่มีเนื้อหาให้แชร์','#b45309');return;}
+  if(navigator.share){
+    try{await navigator.share({title:'AI Clinical Pharmacist',text:txt});}
+    catch(e){if(e.name!=='AbortError')toast('แชร์ไม่สำเร็จ','#b45309');}
+  }else{
+    try{await navigator.clipboard.writeText(txt);toast('💻 อุปกรณ์นี้ไม่รองรับแชร์ตรง — คัดลอกให้แล้ว');}
+    catch{toast('⚠ ใช้ปุ่มคัดลอกแทน','#b45309');}
+  }
+}
+
+// ── Export PDF (เปิดหน้าต่างพิมพ์ → Save as PDF) ──
+async function exportPDF(){
+  let title='',body='';
+  if(qrSource==='review'){
+    if(qrMode==='med'){
+      title='รายการยาและวิธีใช้';
+      const meds=document.getElementById('meds')?.value.trim()||'';
+      const age=document.getElementById('age')?.value||'';
+      const dx=document.getElementById('diagnosis')?.value.trim()||'';
+      if(!meds){toast('⚠ ไม่มีรายการยา','#b45309');return;}
+      body=(age?'<p><b>อายุ:</b> '+age+' ปี</p>':'')+(dx?'<p><b>การวินิจฉัย:</b> '+escapeHtml(dx)+'</p>':'')+'<hr><h3>รายการยา</h3><ul>'+meds.split('\n').filter(Boolean).map(l=>'<li>'+escapeHtml(l)+'</li>').join('')+'</ul>'+(qrMedSummary?'<hr><h3>คำแนะนำการใช้ยา (ย่อ)</h3><pre style="white-space:pre-wrap;font-family:inherit">'+escapeHtml(qrMedSummary)+'</pre>':'');
+    }else if(qrMode==='guide'){
+      title='คู่มือผู้ป่วย';
+      if(!guideCache){toast('⚠ ยังไม่มีคู่มือ กดปุ่มคู่มือผู้ป่วยก่อน','#b45309');return;}
+      body=mdToHtml(guideCache);
+    }else{
+      title='คำตอบจาก AI';
+      body=mdToHtml(qrCurrentText||'');
+    }
+  }else{
+    // chat / dose → PDF จากคำตอบ AI ล่าสุด
+    const src=getShareSource();
+    if(!src.text){toast('⚠ '+src.emptyMsg,'#b45309');return;}
+    title=qrSource==='dose'?'ผลการคำนวณขนาดยา':'คำตอบจาก AI (คลินิก)';
+    body=mdToHtml(src.text);
+  }
+  openPrintWindow(title,body,false);
+}
+
+// ── สร้าง + เปิดคู่มือผู้ป่วยจากคำตอบ (chat/dose) เป็น PDF ──
+async function exportGuidePDF(){
+  const src=getShareSource();
+  if(!src.text){toast('⚠ '+src.emptyMsg,'#b45309');return;}
+  toast('📖 AI กำลังสร้างคู่มือผู้ป่วย...');
+  try{
+    const guide=await callGAS('generateGuideFromText',src.text);
+    openPrintWindow('คู่มือผู้ป่วย',mdToHtml(guide),false);
+  }catch(e){toast('❌ '+e.message,'#dc2626');}
+}
+
+// ── พิมพ์ฉลากยา — ดึงข้อมูลตาม context (รายการยา หรือคำตอบ AI) ──
+async function printLabel(){
+  const src=getShareSource();
+  if(!src.text){toast('⚠ '+src.emptyMsg,'#b45309');return;}
+  toast('🏷️ AI กำลังสร้างฉลากยา...');
+  try{
+    const raw=await callGAS('generateDrugLabel',src.text);
+    const cleaned=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+    let labels;try{labels=JSON.parse(cleaned);}catch{throw new Error('แปลงข้อมูลฉลากไม่สำเร็จ');}
+    if(!Array.isArray(labels)||!labels.length){toast('⚠ ไม่พบยาในข้อมูล','#b45309');return;}
+    const labelHtml=labels.map(L=>`
+      <div class="label">
+        <div class="label-name">${escapeHtml(L.name||'')}</div>
+        <div class="label-inst">${escapeHtml(L.instruction||'')}</div>
+        ${L.timing?'<div class="label-time">⏰ '+escapeHtml(L.timing)+'</div>':''}
+        ${L.warning?'<div class="label-warn">⚠ '+escapeHtml(L.warning)+'</div>':''}
+        <div class="label-foot">เภสัชกร · ${new Date().toLocaleDateString('th-TH')}</div>
+      </div>`).join('');
+    openPrintWindow('ฉลากยา',labelHtml,true);
+  }catch(e){toast('❌ '+e.message,'#dc2626');}
+}
+
+// คืนค่า source text ตาม context ปัจจุบัน
+function getShareSource(){
+  if(qrSource==='review'){
+    const meds=document.getElementById('meds')?.value.trim()||'';
+    return {text:meds, emptyMsg:'ไม่มีรายการยาในหน้าวิเคราะห์'};
+  }
+  // chat / dose → ใช้คำตอบ AI ล่าสุด (มีขนาดยาที่ปรับแล้ว)
+  let last=null;
+  if(qrSource==='dose')last=[...doseHistory].reverse().find(m=>m.role==='assistant');
+  else last=[...chatHistory].reverse().find(m=>m.role==='assistant');
+  return {text:last?last.content:'', emptyMsg:'ยังไม่มีคำตอบจาก AI ในหน้านี้'};
+}
+
+function openPrintWindow(title,bodyHtml,isLabel){
+  const w=window.open('','_blank');
+  if(!w){toast('⚠ Popup ถูกบล็อก กรุณาอนุญาต popup','#b45309');return;}
+  const labelCSS=isLabel?`
+    .label{border:1.5px dashed #0f766e;border-radius:8px;padding:10px 12px;margin:0 0 10px;page-break-inside:avoid;width:7.5cm}
+    .label-name{font-weight:700;font-size:13pt;color:#0f766e;border-bottom:1px solid #ccc;padding-bottom:3px;margin-bottom:4px}
+    .label-inst{font-size:12pt;line-height:1.5}
+    .label-time{font-size:11pt;color:#b45309;margin-top:3px;font-weight:600}
+    .label-warn{font-size:10.5pt;color:#dc2626;margin-top:3px;font-weight:600}
+    .label-foot{font-size:8pt;color:#888;margin-top:5px;text-align:right}
+    @media print{@page{margin:8mm}}`:`
+    body{max-width:18cm;margin:0 auto}
+    h3{color:#0f766e;border-bottom:2px solid #ccfbf1;padding-bottom:4px}
+    ul{padding-left:20px}li{margin:4px 0}
+    table{border-collapse:collapse;width:100%;margin:8px 0}
+    th,td{border:1px solid #ccc;padding:5px 8px;text-align:left;font-size:10pt}
+    th{background:#e6faf7;color:#134e4a}
+    blockquote{border-left:3px solid #14b8a6;background:#f0fdfa;padding:6px 12px;margin:8px 0}`;
+  w.document.write(`<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>${title}</title>
+    <style>
+    *{box-sizing:border-box}
+    body{font-family:'Sarabun','TH Sarabun New',sans-serif;padding:16px;color:#1e293b;line-height:1.6}
+    h1{font-size:16pt;color:#0f766e;text-align:center;margin-bottom:4px}
+    .head-sub{text-align:center;font-size:9pt;color:#888;margin-bottom:14px}
+    ${labelCSS}
+    </style></head><body>
+    <h1>${title}</h1>
+    <div class="head-sub">AI Clinical Pharmacist · ${new Date().toLocaleString('th-TH')}</div>
+    ${isLabel?'<div style="display:flex;flex-wrap:wrap;gap:8px">'+bodyHtml+'</div>':bodyHtml}
+    <script>window.onload=()=>{setTimeout(()=>window.print(),400)}<\/script>
+    </body></html>`);
+  w.document.close();
+  toast('✓ เปิดหน้าพิมพ์ — เลือก "บันทึกเป็น PDF" หรือพิมพ์ได้เลย');
+}
+
+function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function mdToHtml(md){try{return marked.parse(md||'');}catch{return escapeHtml(md||'').replace(/\n/g,'<br>');}}
+
+function exportText(source){let content='',filename='';if(source==='chat'){if(!chatHistory.length){toast('⚠ ยังไม่มีการสนทนา','#b45309');return;}content=chatHistory.map(m=>(m.role==='user'?'👤 คุณ:\n':' \n🤖 AI:\n')+m.content).join('\n\n---\n');filename='clinical-chat-'+Date.now()+'.txt';}else if(source==='dose'){if(!doseHistory.length){toast('⚠ ยังไม่มีการคำนวณ','#b45309');return;}content=doseHistory.map(m=>(m.role==='user'?'👤 คำถาม:\n':'\n💊 คำนวณ:\n')+m.content).join('\n\n---\n');filename='dosing-calc-'+Date.now()+'.txt';}const blob=new Blob([content],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('✓ Export .txt สำเร็จ');}
+
+// ══════════════════════════════
+// VOICE INPUT v3 — reuse instance, stop() ไม่ใช้ abort()
+// Bug เดิม: abort()+recognition=null บังคับ browser ขอ permission ใหม่ทุกครั้ง
+// ══════════════════════════════
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recognition=null; // สร้างครั้งเดียว reuse ตลอด session
+let isRecording=false,micTargetId=null;
+const MIC_ERRORS={'not-allowed':'⚠ ไม่ได้รับสิทธิ์ไมค์ — ตรวจสอบ Site Permissions ใน Browser','permission-denied':'⚠ ไมค์ถูกปฏิเสธ — ไปที่ Settings → Site Permissions → Microphone','audio-capture':'⚠ ไม่พบไมโครโฟน','network':'⚠ ต้องการ Internet ในการใช้ Voice','no-speech':null,'aborted':null,'interrupted':null};
+const MIC_BTN_MAP={chatInput:'micChat',meds:'micMeds',age:'micAge',questions:'micQ',doseInput:'micDose'};
+function _setRecUI(on){isRecording=on;document.querySelectorAll('.icon-btn.recording').forEach(b=>b.classList.remove('recording'));if(on&&micTargetId){const btnId=MIC_BTN_MAP[micTargetId];if(btnId)document.getElementById(btnId)?.classList.add('recording');}}
+function _getRecognition(){
+  if(recognition)return recognition;
+  if(!SpeechRec)return null;
+  recognition=new SpeechRec();recognition.lang='th-TH';recognition.continuous=true;recognition.interimResults=true;
+  recognition.onresult=e=>{let f='',im='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)f+=e.results[i][0].transcript;else im+=e.results[i][0].transcript;}const el=document.getElementById(micTargetId);if(el){el.value=f||im;if(micTargetId==='chatInput'||micTargetId==='doseInput')autoTA(el);}};
+  recognition.onend=()=>{if(!isRecording)return;try{recognition.start();}catch(e){if(e.name!=='InvalidStateError')_setRecUI(false);}};
+  recognition.onerror=e=>{
+    if(e.error==='not-allowed'||e.error==='permission-denied'){
+      _setRecUI(false);
+      toast('⚠ ไมค์ถูกบล็อกในหน้าฝัง — เปิดแอปในแท็บแยกแล้วอนุญาตไมค์ (Chrome: เมนู ⋮ → เปิดในแท็บใหม่)','#dc2626');
+      return;
+    }
+    const msg=MIC_ERRORS[e.error];
+    if(msg)toast(msg,'#dc2626');
+    if(e.error!=='no-speech'&&e.error!=='aborted'&&e.error!=='interrupted')_setRecUI(false);
+  };
+  return recognition;
+}
+function toggleMic(targetId){
+  if(isRecording){
+    _setRecUI(false);
+    if(recognition){try{recognition.stop();}catch(_){}}
+    toast('⏹ หยุดฟังแล้ว','#475569');
+    return;
+  }
+  if(!SpeechRec){
+    toast('⚠ เบราว์เซอร์นี้ไม่รองรับ Voice — ใช้ Chrome หรือ Edge','#b45309');
+    return;
+  }
+  // หมายเหตุ: GAS รันใน iframe — ไม่เรียก getUserMedia (จะ fail เสมอ)
+  // เรียก SpeechRecognition ตรงๆ ซึ่งทำงานได้ถ้า browser อนุญาตไมค์ให้ domain
+  const rec=_getRecognition();
+  if(!rec)return;
+  micTargetId=targetId;
+  try{
+    rec.start();
+    _setRecUI(true);
+    toast('🎤 กำลังฟัง... พูดได้เลย (กดอีกครั้งเพื่อหยุด)');
+  }catch(e){
+    if(e.name==='InvalidStateError'){
+      try{rec.stop();}catch(_){}
+      setTimeout(()=>{try{rec.start();_setRecUI(true);toast('🎤 กำลังฟัง...');}catch(e2){_micFail();}},250);
+    }else{
+      _micFail();
+    }
+  }
+}
+function _micFail(){
+  _setRecUI(false);
+  toast('⚠ ไมค์ถูกบล็อกในหน้าฝัง — เปิดแอปในแท็บแยก (กดเมนู ⋮ → Open in new tab) แล้วอนุญาตไมค์','#dc2626');
+}
+
+
+// ══════════════════════════════
+// SESSION HISTORY — Chat & Dose (localStorage, 10 each)
+// ══════════════════════════════
+const SESS_KEYS={chat:'pharma_chat_hist',dose:'pharma_dose_hist'};
+const MAX_SESS=10;
+let curSessType='chat';
+
+function getSessions(type){try{return JSON.parse(localStorage.getItem(SESS_KEYS[type])||'[]');}catch{return[];}}
+
+function saveSession(type){
+  const hist=type==='chat'?chatHistory:doseHistory;
+  if(!hist.length)return;
+  let items=getSessions(type);
+  // ใช้ first user message เป็น label
+  const firstQ=hist.find(m=>m.role==='user');
+  const label=firstQ?firstQ.content.substring(0,50):'(ไม่มีข้อความ)';
+  // ถ้า session ปัจจุบันมีอยู่แล้ว (sessionId) ให้ update, ไม่งั้นสร้างใหม่
+  if(!window._curSessId)window._curSessId={chat:null,dose:null};
+  const sid=window._curSessId[type];
+  const snapshot={id:sid||Date.now(),ts:new Date().toISOString(),label,turns:hist.length,data:JSON.parse(JSON.stringify(hist))};
+  if(sid){
+    const idx=items.findIndex(x=>x.id===sid);
+    if(idx>=0)items[idx]=snapshot;else items.unshift(snapshot);
+  }else{
+    window._curSessId[type]=snapshot.id;
+    items.unshift(snapshot);
+  }
+  if(items.length>MAX_SESS)items=items.slice(0,MAX_SESS);
+  try{localStorage.setItem(SESS_KEYS[type],JSON.stringify(items));}catch(e){}
+}
+
+function openSessionHistory(type){
+  curSessType=type;
+  document.getElementById('sessTitle').textContent=type==='chat'?'ประวัติการสนทนา (Chat)':'ประวัติการคำนวณ (Dose)';
+  renderSessionList();
+  openModal('modalSession');
+}
+
+function renderSessionList(){
+  const items=getSessions(curSessType);
+  const el=document.getElementById('sessList');
+  if(!items.length){
+    el.innerHTML='<div class="empty-st" style="min-height:120px"><i class="fa-solid fa-clock-rotate-left" style="font-size:1.8rem;color:var(--border);margin-bottom:.5rem"></i><p style="font-size:.85rem;color:var(--s4)">ยังไม่มีประวัติ</p></div>';
+    return;
+  }
+  const ico=curSessType==='chat'?'fa-comments':'fa-calculator';
+  el.innerHTML=items.map(it=>`
+    <div class="hist-item" onclick="restoreSession(${it.id})">
+      <div class="hist-ico"><i class="fa-solid ${ico}"></i></div>
+      <div class="hist-body">
+        <div class="hist-label">${it.label.replace(/</g,'&lt;')}</div>
+        <div class="hist-meta"><i class="fa-regular fa-clock" style="font-size:.6rem"></i> ${fmtDate(it.ts)} · ${it.turns} ข้อความ</div>
+      </div>
+      <button class="hist-del" onclick="deleteSession(event,${it.id})"><i class="fa-solid fa-xmark"></i></button>
+    </div>`).join('');
+}
+
+function restoreSession(id){
+  const it=getSessions(curSessType).find(x=>x.id===id);
+  if(!it)return;
+  if(!window._curSessId)window._curSessId={chat:null,dose:null};
+  window._curSessId[curSessType]=id;
+  if(curSessType==='chat'){
+    chatHistory=JSON.parse(JSON.stringify(it.data));
+    document.getElementById('msgs').innerHTML='';
+    chatHistory.forEach(m=>{
+      if(m.role==='user')appendBubble('user',m.content,null);
+      else appendBubble('ai',m.content,null);
+    });
+    updChatStat();
+    document.getElementById('copyChat').style.display='inline-flex';
+    closeModal('modalSession');
+    switchTab('chat');
+    toast('✓ เรียกคืนการสนทนาแล้ว');
+  }else{
+    doseHistory=JSON.parse(JSON.stringify(it.data));
+    const area=document.getElementById('doseChatArea');
+    area.innerHTML='';
+    doseHistory.forEach(m=>appendDoseBubble(m.role==='user'?'user':'ai',m.content));
+    closeModal('modalSession');
+    switchTab('calc');
+    toast('✓ เรียกคืนการคำนวณแล้ว');
+  }
+}
+
+function deleteSession(e,id){
+  e.stopPropagation();
+  let items=getSessions(curSessType).filter(x=>x.id!==id);
+  localStorage.setItem(SESS_KEYS[curSessType],JSON.stringify(items));
+  if(window._curSessId&&window._curSessId[curSessType]===id)window._curSessId[curSessType]=null;
+  renderSessionList();
+}
+
+function clearAllSession(){
+  if(!confirm('ลบประวัติทั้งหมด?'))return;
+  localStorage.removeItem(SESS_KEYS[curSessType]);
+  if(window._curSessId)window._curSessId[curSessType]=null;
+  renderSessionList();
+  toast('✓ ล้างประวัติแล้ว','#475569');
+}
+
+// ── MODAL ──
+function openModal(id){
+  const el=document.getElementById(id);
+  if(el){el.classList.add('open');}
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');if(id==='modalExtract'){resetExtractImg();switchExtTab('text');document.getElementById('rawNote').value='';}if(id==='modalHistory'){};}
+document.querySelectorAll('.modal-ov').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)closeModal(el.id);}));
+
+// ── TOAST ──
+let toastT;
+function toast(msg,bg='#0f766e'){const t=document.getElementById('toast');t.textContent=msg;t.style.background=bg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ── UTILS ──
+function autoTA(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,130)+'px';}
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){if(document.getElementById('panelR').classList.contains('on')){e.preventDefault();doReview();}}
+  if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key==='D'){e.preventDefault();toggleDarkMode();}
+  if(e.key==='Escape')document.querySelectorAll('.modal-ov.open').forEach(m=>m.classList.remove('open'));
+});
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  initTheme();togglePreg();updMedCnt();initWelcome();updateHistCount();
+  // History button
+  document.getElementById('histBtn')?.addEventListener('click',()=>{renderHistoryList();openModal('modalHistory');});
+  // Show panels
+  document.getElementById('panelR').style.display='flex';
+  document.getElementById('panelC').style.display='none';
+  document.getElementById('panelK').style.display='none';
+});
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{if(!localStorage.getItem('theme'))applyTheme(e.matches,true);});
+</script>
+</body>
+</html>
