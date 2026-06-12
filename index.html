@@ -935,6 +935,26 @@ function callGAS(fn, ...args) {
   });
 }
 
+  // 4. ส่งข้อมูลข้ามไปประมวลผลที่หลังบ้าน Google
+  return new Promise((ok, fail) => {
+    fetch(gasUrl, {
+      method: 'POST',
+      body: JSON.stringify(requestPayload)
+    })
+    .then(response => response.json())
+    .then(res => {
+      if (res.status === 'success') {
+        ok(res.data);
+      } else {
+        fail(new Error(res.message));
+      }
+    })
+    .catch(err => {
+      fail(err);
+    });
+  });
+}
+
   // 3. ตรงนี้จะช่วยคัดแยกหัวข้อข้อมูลตามโครงสร้างฟังก์ชันเดิมของคุณ Boss ใน Code.gs ค่ะ[cite: 1]
   if (fn === 'analyzeMedications') {
     requestPayload.payload.patientContext = args[0];[cite: 1]
