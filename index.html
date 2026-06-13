@@ -872,7 +872,7 @@ marked.setOptions({breaks:true,gfm:true});
 function safeHtml(md){return marked.parse(md||'').replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\sonerror\s*=/gi,' data-err=').replace(/javascript:/gi,'blocked:');}
 function callGAS(fn, ...args) {
   // 1. ลิงก์ URL Web App ของคุณ Boss
-  const gasUrl = "https://script.google.com/macros/s/AKfycbzsIC9MSgzSRvwWC5RJoZ1gob1qvF41jeV94NPLQTzp_Y1r9viEzLIccy2J0Va_h4vRGA/exec";
+  const gasUrl = "https://script.google.com/macros/s/AKfycbxW3WSkBatxUe35IO2KzhTRdg1RLV0yU_IcGrpXd_9exzgqS0d9bFG1uoucbYgSQzcpfQ/exec";
 
   // 2. จัดเตรียมรูปแบบกล่องพัสดุ (Payload)
   const requestPayload = {
