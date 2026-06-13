@@ -870,7 +870,9 @@ select.inp{cursor:pointer}
 // ── INIT ──
 marked.setOptions({breaks:true,gfm:true});
 function safeHtml(md){return marked.parse(md||'').replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\sonerror\s*=/gi,' data-err=').replace(/javascript:/gi,'blocked:');}
+
 function callGAS(fn, ...args) {
+  // ลิงก์ URL Web App ล่าสุดของคุณ Boss
   const gasUrl = "https://script.google.com/macros/s/AKfycbxW3WSkBatxUe35IO2KzhTRdg1RLV0yU_IcGrpXd_9exzgqS0d9bFG1uoucbYgSQzcpfQ/exec";
 
   const requestPayload = {
@@ -878,39 +880,17 @@ function callGAS(fn, ...args) {
     payload: {}
   };
 
-  if (fn === 'analyzeMedications') {
-    requestPayload.payload.patientContext = args[0];
-  } else if (fn === 'analyzeMedicationsWithImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-    requestPayload.payload.patientContext = args[2];
-  } else if (fn === 'consultClinical') {
-    requestPayload.payload.historyJson = JSON.stringify(args[0] || []);
-    requestPayload.payload.ctxJson = JSON.stringify(args[1] || {});
-  } else if (fn === 'consultClinicalWithImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-    requestPayload.payload.historyJson = JSON.stringify(args[2] || []);
-    requestPayload.payload.ctxJson = JSON.stringify(args[3] || {});
-  } else if (fn === 'calcDosing') {
-    requestPayload.payload.historyJson = JSON.stringify(args[0] || []);
-    requestPayload.payload.patientCtxJson = JSON.stringify(args[1] || {});
-  } else if (fn === 'autoFillFromImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-  } else if (fn === 'extractMedicationsFromNote') {
-    requestPayload.payload.rawText = args[0];
-  } else if (fn === 'generatePatientGuide') {
-    requestPayload.payload.medicationList = args[0];
-  } else if (fn === 'checkDDI') {
-    requestPayload.payload.drugsText = args[0];
-    requestPayload.payload.supplementsText = args[1];
-  } else if (fn === 'summarizeForQR') {
-    requestPayload.payload.medicationList = args[0];
-    requestPayload.payload.patientInfo = args[1];
-  } else if (fn === 'generateDrugLabel') {
-    requestPayload.payload.medicationList = args[0];
-  }
+  if (fn === 'analyzeMedications') { requestPayload.payload.patientContext = args[0]; }
+  else if (fn === 'analyzeMedicationsWithImage') { requestPayload.payload.imgBase64 = args[0]; requestPayload.payload.mimeType = args[1]; requestPayload.payload.patientContext = args[2]; }
+  else if (fn === 'consultClinical') { requestPayload.payload.historyJson = JSON.stringify(args[0] || []); requestPayload.payload.ctxJson = JSON.stringify(args[1] || {}); }
+  else if (fn === 'consultClinicalWithImage') { requestPayload.payload.imgBase64 = args[0]; requestPayload.payload.mimeType = args[1]; requestPayload.payload.historyJson = JSON.stringify(args[2] || []); requestPayload.payload.ctxJson = JSON.stringify(args[3] || {}); }
+  else if (fn === 'calcDosing') { requestPayload.payload.historyJson = JSON.stringify(args[0] || []); requestPayload.payload.patientCtxJson = JSON.stringify(args[1] || {}); }
+  else if (fn === 'autoFillFromImage') { requestPayload.payload.imgBase64 = args[0]; requestPayload.payload.mimeType = args[1]; }
+  else if (fn === 'extractMedicationsFromNote') { requestPayload.payload.rawText = args[0]; }
+  else if (fn === 'generatePatientGuide') { requestPayload.payload.medicationList = args[0]; }
+  else if (fn === 'checkDDI') { requestPayload.payload.drugsText = args[0]; requestPayload.payload.supplementsText = args[1]; }
+  else if (fn === 'summarizeForQR') { requestPayload.payload.medicationList = args[0]; requestPayload.payload.patientInfo = args[1]; }
+  else if (fn === 'generateDrugLabel') { requestPayload.payload.medicationList = args[0]; }
 
   return new Promise((ok, fail) => {
     fetch(gasUrl, {
@@ -926,213 +906,15 @@ function callGAS(fn, ...args) {
       return response.json();
     })
     .then(res => {
-      if (res.status === 'success') {
-        ok(res.data);
-      } else {
-        fail(new Error(res.message));
-      }
+      if (res.status === 'success') { ok(res.data); } 
+      else { fail(new Error(res.message)); }
     })
-    .catch(err => {
-      fail(err);
-    });
-  });
-}
-  // 3. นำข้อมูลใส่เข้า Payload ตามฟังก์ชันที่ถูกเรียก
-  if (fn === 'analyzeMedications') {
-    requestPayload.payload.patientContext = args[0];
-  } else if (fn === 'analyzeMedicationsWithImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-    requestPayload.payload.patientContext = args[2];
-  } else if (fn === 'consultClinical') {
-    requestPayload.payload.historyJson = JSON.stringify(args[0] || []);
-    requestPayload.payload.ctxJson = JSON.stringify(args[1] || {});
-  } else if (fn === 'consultClinicalWithImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-    requestPayload.payload.historyJson = JSON.stringify(args[2] || []);
-    requestPayload.payload.ctxJson = JSON.stringify(args[3] || {});
-  } else if (fn === 'calcDosing') {
-    requestPayload.payload.historyJson = JSON.stringify(args[0] || []);
-    requestPayload.payload.patientCtxJson = JSON.stringify(args[1] || {});
-  } else if (fn === 'autoFillFromImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-  } else if (fn === 'extractMedicationsFromNote') {
-    requestPayload.payload.rawText = args[0];
-  } else if (fn === 'generatePatientGuide') {
-    requestPayload.payload.medicationList = args[0];
-  } else if (fn === 'checkDDI') {
-    requestPayload.payload.drugsText = args[0];
-    requestPayload.payload.supplementsText = args[1];
-  } else if (fn === 'summarizeForQR') {
-    requestPayload.payload.medicationList = args[0];
-    requestPayload.payload.patientInfo = args[1];
-  } else if (fn === 'generateDrugLabel') {
-    requestPayload.payload.medicationList = args[0];
-  }
-
-  // 4. ส่งคำขอไปที่ Google Apps Script
-  return new Promise((ok, fail) => {
-    fetch(gasUrl, {
-      method: 'POST',
-      // ทริคสำคัญ: ใช้ text/plain เพื่อเลี่ยงการติดบล็อก CORS (Cross-Origin) ของ Google
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(requestPayload),
-      redirect: 'follow' // บังคับให้ตาม Redirect 302 ของ Google ไปยังเนื้อหาจริง
-    })
-    .then(response => {
-      if (!response.ok) throw new Error('Network response was not ok');
-      return response.json();
-    })
-    .then(res => {
-      if (res.status === 'success') {
-        ok(res.data);
-      } else {
-        fail(new Error(res.message));
-      }
-    })
-    .catch(err => {
-      fail(err);
-    });
-  });
-}
-
-  // 3. แปลงข้อมูลถามตอบและคำนวณยาเป็น JSON String ตามที่หลังบ้านต้องการ
-  if (fn === 'analyzeMedications') {
-    requestPayload.payload.patientContext = args[0];
-  } else if (fn === 'analyzeMedicationsWithImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-    requestPayload.payload.patientContext = args[2];
-  } else if (fn === 'consultClinical') {
-    requestPayload.payload.historyJson = JSON.stringify(args[0] || []);
-    requestPayload.payload.ctxJson = JSON.stringify(args[1] || {});
-  } else if (fn === 'consultClinicalWithImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-    requestPayload.payload.historyJson = JSON.stringify(args[2] || []);
-    requestPayload.payload.ctxJson = JSON.stringify(args[3] || {});
-  } else if (fn === 'calcDosing') {
-    requestPayload.payload.historyJson = JSON.stringify(args[0] || []);
-    requestPayload.payload.patientCtxJson = JSON.stringify(args[1] || {});
-  } else if (fn === 'autoFillFromImage') {
-    requestPayload.payload.imgBase64 = args[0];
-    requestPayload.payload.mimeType = args[1];
-  } else if (fn === 'extractMedicationsFromNote') {
-    requestPayload.payload.rawText = args[0];
-  } else if (fn === 'generatePatientGuide') {
-    requestPayload.payload.medicationList = args[0];
-  } else if (fn === 'checkDDI') {
-    requestPayload.payload.drugsText = args[0];
-    requestPayload.payload.supplementsText = args[1];
-  } else if (fn === 'summarizeForQR') {
-    requestPayload.payload.medicationList = args[0];
-    requestPayload.payload.patientInfo = args[1];
-  } else if (fn === 'generateDrugLabel') {
-    requestPayload.payload.medicationList = args[0];
-  }
-
-  // 4. ส่งข้อมูลข้ามไปประมวลผลที่หลังบ้าน Google
-  return new Promise((ok, fail) => {
-    fetch(gasUrl, {
-      method: 'POST',
-      body: JSON.stringify(requestPayload)
-    })
-    .then(response => response.json())
-    .then(res => {
-      if (res.status === 'success') {
-        ok(res.data);
-      } else {
-        fail(new Error(res.message));
-      }
-    })
-    .catch(err => {
-      fail(err);
-    });
-  });
-}
-
-  // 4. ส่งข้อมูลข้ามไปประมวลผลที่หลังบ้าน Google
-  return new Promise((ok, fail) => {
-    fetch(gasUrl, {
-      method: 'POST',
-      body: JSON.stringify(requestPayload)
-    })
-    .then(response => response.json())
-    .then(res => {
-      if (res.status === 'success') {
-        ok(res.data);
-      } else {
-        fail(new Error(res.message));
-      }
-    })
-    .catch(err => {
-      fail(err);
-    });
-  });
-}
-
-  // 3. ตรงนี้จะช่วยคัดแยกหัวข้อข้อมูลตามโครงสร้างฟังก์ชันเดิมของคุณ Boss ใน Code.gs ค่ะ[cite: 1]
-  if (fn === 'analyzeMedications') {
-    requestPayload.payload.patientContext = args[0];[cite: 1]
-  } else if (fn === 'analyzeMedicationsWithImage') {
-    requestPayload.payload.imgBase64 = args[0];[cite: 1]
-    requestPayload.payload.mimeType = args[1];[cite: 1]
-    requestPayload.payload.patientContext = args[2];[cite: 1]
-  } else if (fn === 'consultClinical') {
-    requestPayload.payload.historyJson = args[0];[cite: 1]
-    requestPayload.payload.ctxJson = args[1];[cite: 1]
-  } else if (fn === 'consultClinicalWithImage') {
-    requestPayload.payload.imgBase64 = args[0];[cite: 1]
-    requestPayload.payload.mimeType = args[1];[cite: 1]
-    requestPayload.payload.historyJson = args[2];[cite: 1]
-    requestPayload.payload.ctxJson = args[3];[cite: 1]
-  } else if (fn === 'calcDosing') {
-    requestPayload.payload.historyJson = args[0];[cite: 1]
-    requestPayload.payload.patientCtxJson = args[1];[cite: 1]
-  } else if (fn === 'autoFillFromImage') {
-    requestPayload.payload.imgBase64 = args[0];[cite: 1]
-    requestPayload.payload.mimeType = args[1];[cite: 1]
-  } else if (fn === 'extractMedicationsFromNote') {
-    requestPayload.payload.rawText = args[0];[cite: 1]
-  } else if (fn === 'generatePatientGuide') {
-    requestPayload.payload.medicationList = args[0];[cite: 1]
-  } else if (fn === 'checkDDI') {
-    requestPayload.payload.drugsText = args[0];[cite: 1]
-    requestPayload.payload.supplementsText = args[1];[cite: 1]
-  } else if (fn === 'summarizeForQR') {
-    requestPayload.payload.medicationList = args[0];[cite: 1]
-    requestPayload.payload.patientInfo = args[1];[cite: 1]
-  } else if (fn === 'generateDrugLabel') {
-    requestPayload.payload.medicationList = args[0];[cite: 1]
-  }
-
-  // 4. ส่งข้อมูลข้ามไปให้ Google Apps Script (หลังบ้าน) ประมวลผลแบบ Promise[cite: 1]
-  return new Promise((ok, fail) => {
-    fetch(gasUrl, {
-      method: 'POST',
-      body: JSON.stringify(requestPayload)[cite: 1]
-    })
-    .then(response => response.json())
-    .then(res => {
-      if (res.status === 'success') {
-        ok(res.data); // ส่งข้อมูลที่ AI ตอบกลับ ไปทำงานต่อที่หน้าเว็บสำเร็จ[cite: 1]
-      } else {
-        fail(new Error(res.message)); // ส่ง Error แจ้งเตือนถ้าหลังบ้านมีปัญหา[cite: 1]
-      }
-    })
-    .catch(err => {
-      fail(err);
-    });
+    .catch(err => { fail(err); });
   });
 }
 
 // guard เผื่อโค้ดเก่าอ้างถึง (ป้องกัน ReferenceError ตอน exportPDF)
 var qrMode='med',qrMedSummary='';
-
 /* ════════════════════════════════════════════════════════════
    PREVIEW / DEMO FALLBACK — ทำงานเฉพาะตอนเปิดไฟล์นอก Apps Script
    (เช่น preview/ทดสอบ offline). ใน Apps Script จริง google.script
