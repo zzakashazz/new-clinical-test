@@ -871,15 +871,72 @@ select.inp{cursor:pointer}
 marked.setOptions({breaks:true,gfm:true});
 function safeHtml(md){return marked.parse(md||'').replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\sonerror\s*=/gi,' data-err=').replace(/javascript:/gi,'blocked:');}
 function callGAS(fn, ...args) {
-  // 1. ลิงก์ URL Web App ของคุณ Boss
   const gasUrl = "https://script.google.com/macros/s/AKfycbxW3WSkBatxUe35IO2KzhTRdg1RLV0yU_IcGrpXd_9exzgqS0d9bFG1uoucbYgSQzcpfQ/exec";
 
-  // 2. จัดเตรียมรูปแบบกล่องพัสดุ (Payload)
   const requestPayload = {
     action: fn,
     payload: {}
   };
 
+  if (fn === 'analyzeMedications') {
+    requestPayload.payload.patientContext = args[0];
+  } else if (fn === 'analyzeMedicationsWithImage') {
+    requestPayload.payload.imgBase64 = args[0];
+    requestPayload.payload.mimeType = args[1];
+    requestPayload.payload.patientContext = args[2];
+  } else if (fn === 'consultClinical') {
+    requestPayload.payload.historyJson = JSON.stringify(args[0] || []);
+    requestPayload.payload.ctxJson = JSON.stringify(args[1] || {});
+  } else if (fn === 'consultClinicalWithImage') {
+    requestPayload.payload.imgBase64 = args[0];
+    requestPayload.payload.mimeType = args[1];
+    requestPayload.payload.historyJson = JSON.stringify(args[2] || []);
+    requestPayload.payload.ctxJson = JSON.stringify(args[3] || {});
+  } else if (fn === 'calcDosing') {
+    requestPayload.payload.historyJson = JSON.stringify(args[0] || []);
+    requestPayload.payload.patientCtxJson = JSON.stringify(args[1] || {});
+  } else if (fn === 'autoFillFromImage') {
+    requestPayload.payload.imgBase64 = args[0];
+    requestPayload.payload.mimeType = args[1];
+  } else if (fn === 'extractMedicationsFromNote') {
+    requestPayload.payload.rawText = args[0];
+  } else if (fn === 'generatePatientGuide') {
+    requestPayload.payload.medicationList = args[0];
+  } else if (fn === 'checkDDI') {
+    requestPayload.payload.drugsText = args[0];
+    requestPayload.payload.supplementsText = args[1];
+  } else if (fn === 'summarizeForQR') {
+    requestPayload.payload.medicationList = args[0];
+    requestPayload.payload.patientInfo = args[1];
+  } else if (fn === 'generateDrugLabel') {
+    requestPayload.payload.medicationList = args[0];
+  }
+
+  return new Promise((ok, fail) => {
+    fetch(gasUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify(requestPayload),
+      redirect: 'follow'
+    })
+    .then(response => {
+      if (!response.ok) throw new Error('Network error');
+      return response.json();
+    })
+    .then(res => {
+      if (res.status === 'success') {
+        ok(res.data);
+      } else {
+        fail(new Error(res.message));
+      }
+    })
+    .catch(err => {
+      fail(err);
+    });
+  });
+}
   // 3. นำข้อมูลใส่เข้า Payload ตามฟังก์ชันที่ถูกเรียก
   if (fn === 'analyzeMedications') {
     requestPayload.payload.patientContext = args[0];
