@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>AI Clinical Pharmacist</title>
+<title>Clinical Pharmacist</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -334,7 +334,7 @@ select.inp{cursor:pointer}
 .crcl-fill{height:100%;border-radius:99px;transition:width .55s cubic-bezier(.4,1.2,.5,1),background .4s ease;background-image:linear-gradient(90deg,rgba(255,255,255,.25),transparent)}
 .crcl-result{font-size:1.85rem;font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#0f766e,#14b8a6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 [data-theme="dark"] .crcl-result{background:linear-gradient(135deg,#2dd4bf,#5eead4);-webkit-background-clip:text;background-clip:text}
-.crcl-stage{font-size:.76rem;font-weight:700;padding:3px 10px;border-radius:99px;display:inline-block;margin-left:.4rem;box-shadow:var(--sh-xs)}
+.crcl-stage{font-size:.76rem;font-weight:700;padding:3px 10px;border-radius:99px;display:inline-block;margin-left:.4rem;box-shadow:var(--sh-xs)}.lab-autofilled{background:#fef3c7!important;border-color:#f59e0b!important;box-shadow:0 0 0 2px rgba(245,158,11,.25)}[data-theme="dark"] .lab-autofilled{background:#422006!important;border-color:#b45309!important}.gov-bar{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;justify-content:center;background:#fffbeb;border-bottom:1px solid #fde68a;color:#92400e;font-size:.72rem;padding:.35rem .8rem;line-height:1.35}.gov-bar .gv-sep{opacity:.4}.gov-bar label{display:inline-flex;align-items:center;gap:.25rem}.gov-bar input{font-family:inherit;font-size:.72rem;border:1px solid #fcd34d;border-radius:6px;padding:1px 6px;width:84px;background:#fff;color:#92400e}.gov-bar button{font-family:inherit;font-size:.72rem;border:1px solid #fcd34d;background:#fff;color:#92400e;border-radius:6px;padding:1px 8px;cursor:pointer;display:inline-flex;align-items:center;gap:.25rem}.gov-bar button:hover{background:#fef3c7}[data-theme="dark"] .gov-bar{background:#3f2d0a;border-color:#854d0e;color:#fde68a}[data-theme="dark"] .gov-bar input,[data-theme="dark"] .gov-bar button{background:#1f1300;border-color:#854d0e;color:#fde68a}
 .ckd1{background:#d1fae5;color:#065f46}.ckd2{background:#a7f3d0;color:#065f46}
 .ckd3a{background:#fef9c3;color:#713f12}.ckd3b{background:#fed7aa;color:#7c2d12}
 .ckd4{background:#fecaca;color:#7f1d1d}.ckd5{background:#fca5a5;color:#450a0a}
@@ -424,7 +424,7 @@ select.inp{cursor:pointer}
 <header class="app-hd">
   <div class="brand">
     <div class="brand-ico"><i class="fa-solid fa-pills"></i></div>
-    <span class="brand-name">AI Clinical Pharmacist</span>
+    <span class="brand-name">Clinical Pharmacist</span>
   </div>
   <div style="display:flex;align-items:center;gap:.5rem">
     <button class="dm-btn" id="dmBtn" onclick="toggleDarkMode()" title="สลับ Dark / Light Mode">
@@ -433,6 +433,14 @@ select.inp{cursor:pointer}
     <div class="model-pill"><span class="pdot"></span>gemini-3.1-flash-lite</div>
   </div>
 </header>
+<div class="gov-bar">
+  <span>⚕️ เครื่องมือช่วยตัดสินใจ — ต้องตรวจสอบโดยเภสัชกร/แพทย์ก่อนใช้จริง</span>
+  <span class="gv-sep">|</span>
+  <span>🔒 ข้อมูลส่งประมวลผลที่ Google Gemini — โปรดลบชื่อ-HN ผู้ป่วย</span>
+  <span class="gv-sep">|</span>
+  <label>ผู้ใช้: <input id="govUser" maxlength="20" placeholder="ชื่อย่อ" oninput="localStorage.setItem('pharma_user',this.value)"></label>
+  <button onclick="openAudit()"><i class="fa-solid fa-clipboard-list"></i> Audit log</button>
+</div>
 
 <!-- TABS -->
 <div class="tabs">
@@ -503,6 +511,51 @@ select.inp{cursor:pointer}
               </div>
               <div id="pregFb" style="display:flex;gap:1rem"><label class="cbw"><input type="checkbox" id="pregCb"> ตั้งครรภ์</label><label class="cbw"><input type="checkbox" id="lactCb"> ให้นมบุตร</label></div>
             </div>
+            <!-- DETAILED HOSPITAL LABS (collapsible) -->
+            <div class="sec-box fstack" style="gap:.55rem">
+              <button type="button" onclick="toggleLabs()" id="labsToggle" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;cursor:pointer;padding:0;font-family:'Sarabun',sans-serif">
+                <span style="font-size:.67rem;font-weight:700;color:var(--s4);letter-spacing:.06em;text-transform:uppercase"><i class="fa-solid fa-vials" style="color:var(--t6);margin-right:5px"></i>ค่า Lab โรงพยาบาล (ละเอียด)</span>
+                <span style="display:flex;align-items:center;gap:.4rem"><span id="labsCount" class="bdg bdg-blue" style="display:none"></span><i class="fa-solid fa-chevron-down" id="labsChevron" style="color:var(--s4);font-size:.7rem;transition:transform .2s"></i></span>
+              </button>
+              <div id="labsBody" style="display:none;flex-direction:column;gap:.7rem">
+              <div>
+  <div style="font-size:.63rem;font-weight:700;color:var(--t7);margin-bottom:.3rem">เกลือแร่ & เมตาบอลิก</div>
+  <div class="g3"><div class="fg"><label class="lbl" style="font-size:.66rem">Na <span style="color:var(--s4);font-size:.56rem;font-weight:400">135–145</span></label><input type="text" id="lb-na" class="inp" placeholder="mmol/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">K <span style="color:var(--s4);font-size:.56rem;font-weight:400">3.5–5.0</span></label><input type="text" id="lb-k" class="inp" placeholder="mmol/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Cl <span style="color:var(--s4);font-size:.56rem;font-weight:400">98–107</span></label><input type="text" id="lb-cl" class="inp" placeholder="mmol/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">HCO₃ <span style="color:var(--s4);font-size:.56rem;font-weight:400">22–29</span></label><input type="text" id="lb-hco3" class="inp" placeholder="mmol/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Ca <span style="color:var(--s4);font-size:.56rem;font-weight:400">8.6–10.2</span></label><input type="text" id="lb-ca" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Mg <span style="color:var(--s4);font-size:.56rem;font-weight:400">1.7–2.2</span></label><input type="text" id="lb-mg" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">PO₄ <span style="color:var(--s4);font-size:.56rem;font-weight:400">2.5–4.5</span></label><input type="text" id="lb-po4" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">FBS <span style="color:var(--s4);font-size:.56rem;font-weight:400">70–99</span></label><input type="text" id="lb-glu" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">HbA1c <span style="color:var(--s4);font-size:.56rem;font-weight:400"><5.7</span></label><input type="text" id="lb-hba1c" class="inp" placeholder="%" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div></div>
+</div>
+              <div>
+  <div style="font-size:.63rem;font-weight:700;color:var(--t7);margin-bottom:.3rem">ไต (เพิ่มเติม)</div>
+  <div class="g3"><div class="fg"><label class="lbl" style="font-size:.66rem">BUN <span style="color:var(--s4);font-size:.56rem;font-weight:400">7–20</span></label><input type="text" id="lb-bun" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">eGFR <span style="color:var(--s4);font-size:.56rem;font-weight:400">≥90</span></label><input type="text" id="lb-egfr" class="inp" placeholder="ml/min" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Uric acid <span style="color:var(--s4);font-size:.56rem;font-weight:400">3.5–7.2</span></label><input type="text" id="lb-ua" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div></div>
+</div>
+              <div>
+  <div style="font-size:.63rem;font-weight:700;color:var(--t7);margin-bottom:.3rem">ตับ (LFTs)</div>
+  <div class="g3"><div class="fg"><label class="lbl" style="font-size:.66rem">AST <span style="color:var(--s4);font-size:.56rem;font-weight:400"><40</span></label><input type="text" id="lb-ast" class="inp" placeholder="U/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">ALT <span style="color:var(--s4);font-size:.56rem;font-weight:400"><41</span></label><input type="text" id="lb-alt" class="inp" placeholder="U/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">ALP <span style="color:var(--s4);font-size:.56rem;font-weight:400">40–129</span></label><input type="text" id="lb-alp" class="inp" placeholder="U/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">T.Bili <span style="color:var(--s4);font-size:.56rem;font-weight:400">0.3–1.2</span></label><input type="text" id="lb-tbil" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">D.Bili <span style="color:var(--s4);font-size:.56rem;font-weight:400"><0.3</span></label><input type="text" id="lb-dbil" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Albumin <span style="color:var(--s4);font-size:.56rem;font-weight:400">3.5–5.2</span></label><input type="text" id="lb-alb" class="inp" placeholder="g/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div></div>
+</div>
+              <div>
+  <div style="font-size:.63rem;font-weight:700;color:var(--t7);margin-bottom:.3rem">เม็ดเลือด (CBC)</div>
+  <div class="g3"><div class="fg"><label class="lbl" style="font-size:.66rem">Hb <span style="color:var(--s4);font-size:.56rem;font-weight:400">12–17</span></label><input type="text" id="lb-hb" class="inp" placeholder="g/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Hct <span style="color:var(--s4);font-size:.56rem;font-weight:400">36–50</span></label><input type="text" id="lb-hct" class="inp" placeholder="%" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">WBC <span style="color:var(--s4);font-size:.56rem;font-weight:400">4–11</span></label><input type="text" id="lb-wbc" class="inp" placeholder="×10³/µL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">ANC <span style="color:var(--s4);font-size:.56rem;font-weight:400">≥1500</span></label><input type="text" id="lb-anc" class="inp" placeholder="/µL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Platelet <span style="color:var(--s4);font-size:.56rem;font-weight:400">150–400</span></label><input type="text" id="lb-plt" class="inp" placeholder="×10³/µL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div></div>
+</div>
+              <div>
+  <div style="font-size:.63rem;font-weight:700;color:var(--t7);margin-bottom:.3rem">การแข็งตัวของเลือด</div>
+  <div class="g3"><div class="fg"><label class="lbl" style="font-size:.66rem">INR <span style="color:var(--s4);font-size:.56rem;font-weight:400">0.8–1.2</span></label><input type="text" id="lb-inr" class="inp" placeholder="" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">PT <span style="color:var(--s4);font-size:.56rem;font-weight:400">11–13.5</span></label><input type="text" id="lb-pt" class="inp" placeholder="วินาที" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">aPTT <span style="color:var(--s4);font-size:.56rem;font-weight:400">25–35</span></label><input type="text" id="lb-aptt" class="inp" placeholder="วินาที" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div></div>
+</div>
+              <div>
+  <div style="font-size:.63rem;font-weight:700;color:var(--t7);margin-bottom:.3rem">ไขมัน (Lipid)</div>
+  <div class="g3"><div class="fg"><label class="lbl" style="font-size:.66rem">Total Chol <span style="color:var(--s4);font-size:.56rem;font-weight:400"><200</span></label><input type="text" id="lb-tc" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">LDL <span style="color:var(--s4);font-size:.56rem;font-weight:400"><100</span></label><input type="text" id="lb-ldl" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">HDL <span style="color:var(--s4);font-size:.56rem;font-weight:400">>40</span></label><input type="text" id="lb-hdl" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Triglyceride <span style="color:var(--s4);font-size:.56rem;font-weight:400"><150</span></label><input type="text" id="lb-tg" class="inp" placeholder="mg/dL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div></div>
+</div>
+              <div>
+  <div style="font-size:.63rem;font-weight:700;color:var(--t7);margin-bottom:.3rem">หัวใจ & อื่นๆ</div>
+  <div class="g3"><div class="fg"><label class="lbl" style="font-size:.66rem">Troponin <span style="color:var(--s4);font-size:.56rem;font-weight:400">ตามแล็บ</span></label><input type="text" id="lb-trop" class="inp" placeholder="" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">NT-proBNP <span style="color:var(--s4);font-size:.56rem;font-weight:400"><125</span></label><input type="text" id="lb-bnp" class="inp" placeholder="pg/mL" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">TSH <span style="color:var(--s4);font-size:.56rem;font-weight:400">0.4–4.0</span></label><input type="text" id="lb-tsh" class="inp" placeholder="mIU/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">CRP <span style="color:var(--s4);font-size:.56rem;font-weight:400"><3</span></label><input type="text" id="lb-crp" class="inp" placeholder="mg/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Lactate <span style="color:var(--s4);font-size:.56rem;font-weight:400">0.5–2.2</span></label><input type="text" id="lb-lac" class="inp" placeholder="mmol/L" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div></div>
+</div>
+              <div>
+  <div style="font-size:.63rem;font-weight:700;color:var(--t7);margin-bottom:.3rem">สัญญาณชีพ (Vitals)</div>
+  <div class="g3"><div class="fg"><label class="lbl" style="font-size:.66rem">BP </label><input type="text" id="lb-bp" class="inp" placeholder="mmHg" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">HR <span style="color:var(--s4);font-size:.56rem;font-weight:400">60–100</span></label><input type="text" id="lb-hr" class="inp" placeholder="bpm" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">RR <span style="color:var(--s4);font-size:.56rem;font-weight:400">12–20</span></label><input type="text" id="lb-rr" class="inp" placeholder="/min" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">Temp <span style="color:var(--s4);font-size:.56rem;font-weight:400">36.5–37.5</span></label><input type="text" id="lb-temp" class="inp" placeholder="°C" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div><div class="fg"><label class="lbl" style="font-size:.66rem">SpO₂ <span style="color:var(--s4);font-size:.56rem;font-weight:400">≥95</span></label><input type="text" id="lb-spo2" class="inp" placeholder="%" oninput="updLabCount()" style="font-size:.8rem;padding:6px 8px"></div></div>
+</div>
+                <div style="display:flex;gap:.4rem;flex-wrap:wrap;padding-top:.2rem">
+                  <button type="button" class="pill pill-sl" onclick="clearLabs()" style="font-size:.66rem;padding:4px 10px"><i class="fa-solid fa-eraser" style="font-size:.6rem"></i> ล้างค่า Lab</button>
+                  <span style="font-size:.63rem;color:var(--s4);align-self:center">กรอกเฉพาะค่าที่มี — ระบบจะส่งให้ AI วิเคราะห์ประกอบ</span>
+                </div>
+              </div>
+            </div>
             <div class="fg">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
                 <label class="lbl" style="margin-bottom:0">รายการยา<span class="req">*</span></label>
@@ -533,7 +586,7 @@ select.inp{cursor:pointer}
             <div class="result-title"><i class="fa-solid fa-notes-medical"></i> ผลการวิเคราะห์</div>
             <div style="display:flex;gap:.35rem;flex-wrap:wrap">
               <button id="histBtn" class="pill pill-sl"><i class="fa-solid fa-clock-rotate-left" style="font-size:.62rem"></i> <span id="histCount">ประวัติ</span></button>
-              <button id="guideBtn" onclick="openGuide()" class="pill pill-vi" style="display:none"><i class="fa-solid fa-book-medical" style="font-size:.62rem"></i> คู่มือผู้ป่วย</button>
+              <button id="guideBtn" onclick="openGuideFor('review')" class="pill pill-vi" style="display:none"><i class="fa-solid fa-book-medical" style="font-size:.62rem"></i> คู่มือผู้ป่วย</button>
               <button id="qrBtn" onclick="openQR('review')" class="pill pill-tl" style="display:none"><i class="fa-solid fa-share-nodes" style="font-size:.62rem"></i> แชร์/พิมพ์</button>
               <button id="copyRevBtn" onclick="copyReview()" class="pill pill-sl" style="display:none"><i class="fa-regular fa-copy" style="font-size:.62rem"></i> คัดลอก</button>
               <button id="printRevBtn" onclick="window.print()" class="pill pill-sl" style="display:none"><i class="fa-solid fa-print" style="font-size:.62rem"></i> พิมพ์</button>
@@ -572,6 +625,7 @@ select.inp{cursor:pointer}
           <button onclick="openQR('chat')" class="pill pill-tl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-share-nodes" style="font-size:.6rem"></i> แชร์/พิมพ์</button>
           <button onclick="openSessionHistory('chat')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-clock-rotate-left" style="font-size:.6rem"></i> ประวัติ</button>
           <button onclick="exportText('chat')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-download" style="font-size:.6rem"></i> Export</button>
+          <button onclick="openGuideFor('chat')" class="pill pill-vi" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-book-medical" style="font-size:.6rem"></i> คู่มือผู้ป่วย</button>
           <button onclick="copyLastAI()" class="pill pill-sl" id="copyChat" style="display:none;font-size:.67rem;padding:3px 8px"><i class="fa-regular fa-copy" style="font-size:.62rem"></i> คัดลอก</button>
           <button onclick="clearChat()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-trash-can" style="font-size:.6rem"></i></button>
         </div>
@@ -655,6 +709,7 @@ select.inp{cursor:pointer}
               <button onclick="openQR('dose')" class="pill pill-tl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-share-nodes" style="font-size:.6rem"></i> แชร์/พิมพ์</button>
               <button onclick="openSessionHistory('dose')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-clock-rotate-left" style="font-size:.6rem"></i> ประวัติ</button>
               <button onclick="exportText('dose')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-download" style="font-size:.6rem"></i> Export</button>
+              <button onclick="openGuideFor('dose')" class="pill pill-vi" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-book-medical" style="font-size:.6rem"></i> คู่มือผู้ป่วย</button>
               <button onclick="clearDoseChat()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.6rem"></i> ล้าง</button>
             </div>
           </div>
@@ -711,7 +766,13 @@ select.inp{cursor:pointer}
         <div class="card">
           <div class="card-hd">
             <div class="card-title"><i class="fa-solid fa-triangle-exclamation"></i> ตรวจสอบ Drug Interactions</div>
-            <button onclick="clearDDI()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.6rem"></i> ล้าง</button>
+            <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+              <button onclick="openQR('ddi')" class="pill pill-tl" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-share-nodes" style="font-size:.6rem"></i> แชร์/พิมพ์</button>
+              <button onclick="openSessionHistory('ddi')" class="pill pill-sl" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-clock-rotate-left" style="font-size:.6rem"></i> ประวัติ</button>
+              <button onclick="exportText('ddi')" class="pill pill-sl" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-download" style="font-size:.6rem"></i> Export</button>
+              <button onclick="openGuideFor('ddi')" class="pill pill-vi" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-book-medical" style="font-size:.6rem"></i> คู่มือผู้ป่วย</button>
+              <button onclick="clearDDI()" class="pill pill-sl" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.6rem"></i> ล้าง</button>
+            </div>
           </div>
           <div class="card-bd fstack" style="gap:.5rem">
             <div class="g2">
@@ -738,7 +799,13 @@ select.inp{cursor:pointer}
         <div class="card" style="flex:1;display:flex;flex-direction:column">
           <div class="card-hd">
             <div class="card-title"><i class="fa-solid fa-table-list"></i> Dose Adjustment: Renal + Hepatic</div>
-            <button onclick="clearRHResult()" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.6rem"></i> ล้าง</button>
+            <div style="display:flex;gap:.3rem;flex-wrap:wrap">
+              <button onclick="openQR('rh')" class="pill pill-tl" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-share-nodes" style="font-size:.6rem"></i> แชร์/พิมพ์</button>
+              <button onclick="openSessionHistory('rh')" class="pill pill-sl" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-clock-rotate-left" style="font-size:.6rem"></i> ประวัติ</button>
+              <button onclick="exportText('rh')" class="pill pill-sl" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-download" style="font-size:.6rem"></i> Export</button>
+              <button onclick="openGuideFor('rh')" class="pill pill-vi" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-book-medical" style="font-size:.6rem"></i> คู่มือผู้ป่วย</button>
+              <button onclick="clearRHResult()" class="pill pill-sl" style="font-size:.66rem;padding:3px 8px"><i class="fa-solid fa-rotate-left" style="font-size:.6rem"></i> ล้าง</button>
+            </div>
           </div>
           <div class="card-bd fstack" style="gap:.5rem">
             <!-- Drug input -->
@@ -802,6 +869,36 @@ select.inp{cursor:pointer}
 </div>
 
 <!-- MODAL: Patient Guide -->
+<div id="modalConsent" class="modal-ov">
+  <div class="modal-box">
+    <div class="modal-title"><i class="fa-solid fa-shield-halved" style="color:#0f766e"></i> ความเป็นส่วนตัวของข้อมูลผู้ป่วย (PDPA)</div>
+    <div style="font-size:.85rem;line-height:1.65;color:var(--s2)">
+      <p>เครื่องมือนี้ส่งข้อมูลที่คุณกรอก (รวมถึง<b>รูปภาพที่อัปโหลด</b>) ไปประมวลผลด้วย <b>Google Gemini API</b> ซึ่งเป็นบริการภายนอกองค์กร</p>
+      <p style="margin-top:.5rem"><b>โปรดปฏิบัติ:</b></p>
+      <ul style="margin:.3rem 0 .3rem 1.1rem;padding:0">
+        <li>ห้ามกรอกหรืออัปโหลดรูปที่มี <b>ชื่อ-นามสกุล, HN, เลขบัตรประชาชน, เบอร์โทร</b> ของผู้ป่วย</li>
+        <li>ปิดทับ/ลบส่วนที่ระบุตัวตนในรูปก่อนอัปโหลด</li>
+        <li>ใช้เพื่อสนับสนุนการตัดสินใจของบุคลากรเท่านั้น ผลลัพธ์ต้องตรวจสอบก่อนใช้จริง</li>
+      </ul>
+      <p style="font-size:.78rem;color:var(--s4)">ระบบมีตัวช่วยลบเลขบัตร/เบอร์โทร/HN จากข้อความอัตโนมัติ แต่<b>ไม่สามารถลบข้อมูลในรูปภาพได้</b> — ความรับผิดชอบในการลบตัวระบุตัวตนเป็นของผู้ใช้</p>
+    </div>
+    <label style="display:flex;gap:.5rem;align-items:flex-start;margin:.7rem 0;font-size:.82rem;cursor:pointer">
+      <input type="checkbox" id="consentChk" style="margin-top:.2rem">
+      <span>ข้าพเจ้าเข้าใจและยืนยันว่าจะไม่ส่งข้อมูลที่ระบุตัวตนผู้ป่วย หรือได้รับความยินยอม/ลบตัวระบุตัวตนเรียบร้อยแล้ว</span>
+    </label>
+    <div class="modal-acts"><button class="mbt vi" onclick="acceptConsent()"><i class="fa-solid fa-check"></i> รับทราบและยอมรับ</button></div>
+  </div>
+</div>
+<div id="modalAudit" class="modal-ov">
+  <div class="modal-box modal-lg">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;flex-shrink:0">
+      <div class="modal-title" style="margin-bottom:0"><i class="fa-solid fa-clipboard-list" style="color:#0f766e"></i> บันทึกการใช้งาน (Audit Log)</div>
+      <button onclick="closeModal('modalAudit')" style="background:none;border:none;cursor:pointer;color:var(--s4);font-size:1.1rem"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="auditBody" style="flex:1;overflow-y:auto;padding-right:4px"></div>
+    <div class="modal-acts" style="flex-shrink:0"><button class="mbt" onclick="exportAudit()"><i class="fa-solid fa-file-csv"></i> Export CSV</button><button class="mbt" onclick="clearAudit()"><i class="fa-solid fa-trash"></i> ล้าง</button><button class="mbt" onclick="closeModal('modalAudit')">ปิด</button></div>
+  </div>
+</div>
 <div id="modalGuide" class="modal-ov">
   <div class="modal-box modal-lg">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-shrink:0">
@@ -809,7 +906,7 @@ select.inp{cursor:pointer}
       <button onclick="closeModal('modalGuide')" style="background:none;border:none;cursor:pointer;color:var(--s4);font-size:1.1rem"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div id="guideContent" class="md" style="flex:1;overflow-y:auto;padding-right:4px"></div>
-    <div class="modal-acts" style="flex-shrink:0"><button class="mbt" onclick="copyGuide()"><i class="fa-regular fa-copy" style="font-size:.72rem"></i> คัดลอก</button><button class="mbt" onclick="closeModal('modalGuide')" style="flex:2">ปิด</button></div>
+    <div class="modal-acts" style="flex-shrink:0"><button class="mbt" onclick="copyGuide()"><i class="fa-regular fa-copy" style="font-size:.72rem"></i> คัดลอก</button><button class="mbt" onclick="printGuide()"><i class="fa-solid fa-file-pdf" style="font-size:.72rem;color:#dc2626"></i> บันทึก PDF</button><button class="mbt" onclick="closeModal('modalGuide')">ปิด</button></div>
   </div>
 </div>
 
@@ -872,6 +969,7 @@ marked.setOptions({breaks:true,gfm:true});
 function safeHtml(md){return marked.parse(md||'').replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\sonerror\s*=/gi,' data-err=').replace(/javascript:/gi,'blocked:');}
 
 function callGAS(fn, ...args) {
+  args = _govPre(fn, args);
   // ลิงก์ URL Web App ล่าสุดของบอส
   const gasUrl = "https://script.google.com/macros/s/AKfycbxW3WSkBatxUe35IO2KzhTRdg1RLV0yU_IcGrpXd_9exzgqS0d9bFG1uoucbYgSQzcpfQ/exec";
 
@@ -889,6 +987,7 @@ function callGAS(fn, ...args) {
   else if (fn === 'autoFillFromImage') { requestPayload.payload.imgBase64 = args[0]; requestPayload.payload.mimeType = args[1]; }
   else if (fn === 'extractMedicationsFromNote') { requestPayload.payload.rawText = args[0]; }
   else if (fn === 'generatePatientGuide') { requestPayload.payload.medicationList = args[0]; }
+  else if (fn === 'generateGuideFromText') { requestPayload.payload.answerText = args[0]; }
   else if (fn === 'checkDDI') { requestPayload.payload.drugsText = args[0]; requestPayload.payload.supplementsText = args[1]; }
   else if (fn === 'summarizeForQR') { requestPayload.payload.medicationList = args[0]; requestPayload.payload.patientInfo = args[1]; }
   else if (fn === 'generateDrugLabel') { requestPayload.payload.medicationList = args[0]; }
@@ -983,7 +1082,7 @@ Dose = 15 mg/kg × 72 kg = 1080 mg
     consultClinicalWithImage:()=>wait(CHAT,1300),
     calcDosing:()=>wait(DOSE,1100),
     checkDDI:()=>wait(DDI,1200),
-    autoFillFromImage:()=>wait(JSON.stringify({age:"68",sex:"ชาย",weight:"70",diagnosis:"T2DM, CKD",scr:"1.8",crcl:"38",medications:"Metformin 1000mg BD\\nEnalapril 10mg OD"}),1500),
+    autoFillFromImage:()=>wait(JSON.stringify({age:"68",sex:"ชาย",weight:"70",diagnosis:"T2DM, CKD",scr:"1.8",crcl:"38",labs:{na:"138",k:"5.4",bun:"32",egfr:"38",hb:"10.2",alt:"45"},medications:"Metformin 1000mg BD\\nEnalapril 10mg OD"}),1500),
     extractMedicationsFromNote:()=>wait("Metformin 1000mg BD\\nEnalapril 10mg OD\\nSimvastatin 20mg OD hs",1100),
     generatePatientGuide:()=>wait(GUIDE,1200),
     generateGuideFromText:()=>wait(GUIDE,1200),
@@ -1002,6 +1101,7 @@ Dose = 15 mg/kg × 72 kg = 1080 mg
 
 // ── STATE ──
 let reviewRes='',guideCache='',chatHistory=[],doseHistory=[];
+let ddiResultText='',rhResultText='';
 let pendingImgs={review:null,chat:null};
 let extractImgData=null,isSending=false,isReviewing=false,isDoseSending=false;
 let ctxOpen=false,renalCatFilter='all',calcFormula='CG';
@@ -1054,6 +1154,12 @@ function calcCrCl(){
 function togglePreg(){const s=document.getElementById('sex').value;document.getElementById('pregSec').style.display=s==='หญิง'?'block':'none';document.getElementById('pregFb').style.display=s==='หญิง'?'none':'flex';}
 function pickA(btn,val){const el=document.getElementById('allergies');const on=btn.classList.contains('on');document.querySelectorAll('.atag').forEach(b=>b.classList.remove('on'));if(!on){btn.classList.add('on');el.value=val==='ไม่มีประวัติแพ้ยา'?val:(el.value.replace('ไม่มีประวัติแพ้ยา','').trim()?(el.value.includes(val)?el.value:el.value.trim()+', '+val):val);}}
 function updMedCnt(){const v=document.getElementById('meds').value.trim();document.getElementById('medCnt').textContent=(v?v.split('\n').filter(l=>l.trim()).length:0)+' รายการ';}
+// ── DETAILED LABS ──
+const LAB_DEFS=[['lb-na','Na','mmol/L'],['lb-k','K','mmol/L'],['lb-cl','Cl','mmol/L'],['lb-hco3','HCO₃','mmol/L'],['lb-ca','Ca','mg/dL'],['lb-mg','Mg','mg/dL'],['lb-po4','PO₄','mg/dL'],['lb-glu','FBS','mg/dL'],['lb-hba1c','HbA1c','%'],['lb-bun','BUN','mg/dL'],['lb-egfr','eGFR','ml/min'],['lb-ua','Uric acid','mg/dL'],['lb-ast','AST','U/L'],['lb-alt','ALT','U/L'],['lb-alp','ALP','U/L'],['lb-tbil','T.Bili','mg/dL'],['lb-dbil','D.Bili','mg/dL'],['lb-alb','Albumin','g/dL'],['lb-hb','Hb','g/dL'],['lb-hct','Hct','%'],['lb-wbc','WBC','×10³/µL'],['lb-anc','ANC','/µL'],['lb-plt','Platelet','×10³/µL'],['lb-inr','INR',''],['lb-pt','PT','วินาที'],['lb-aptt','aPTT','วินาที'],['lb-tc','Total Chol','mg/dL'],['lb-ldl','LDL','mg/dL'],['lb-hdl','HDL','mg/dL'],['lb-tg','Triglyceride','mg/dL'],['lb-trop','Troponin',''],['lb-bnp','NT-proBNP','pg/mL'],['lb-tsh','TSH','mIU/L'],['lb-crp','CRP','mg/L'],['lb-lac','Lactate','mmol/L'],['lb-bp','BP','mmHg'],['lb-hr','HR','bpm'],['lb-rr','RR','/min'],['lb-temp','Temp','°C'],['lb-spo2','SpO₂','%']];
+function collectDetailedLabs(){const out=[];LAB_DEFS.forEach(d=>{const v=document.getElementById(d[0])?.value.trim();if(v)out.push(d[1]+': '+v+(d[2]?' '+d[2]:''));});return out.join(' | ');}
+function updLabCount(){let n=0;LAB_DEFS.forEach(d=>{if(document.getElementById(d[0])?.value.trim())n++;});const b=document.getElementById('labsCount');if(b){if(n>0){b.textContent=n+' ค่า';b.style.display='inline-block';}else{b.style.display='none';}}}
+function toggleLabs(){const body=document.getElementById('labsBody');const chev=document.getElementById('labsChevron');const open=body.style.display==='flex';body.style.display=open?'none':'flex';if(chev)chev.style.transform=open?'':'rotate(180deg)';}
+function clearLabs(){LAB_DEFS.forEach(d=>{const e=document.getElementById(d[0]);if(e)e.value='';});updLabCount();toast('✓ ล้างค่า Lab แล้ว','#475569');}
 function buildReviewCtx(){
   const g=id=>document.getElementById(id);
   const sex=g('sex').value;const isFem=sex==='หญิง';
@@ -1066,6 +1172,7 @@ function buildReviewCtx(){
   p.push('','=== การวินิจฉัย ===',g('diagnosis').value||'ไม่ระบุ');
   p.push('','=== ประวัติแพ้ยา ===',g('allergies').value||'ไม่มี');
   p.push('','=== Lab / อวัยวะ ===','SCr: '+(g('scr').value||'ไม่ระบุ')+' mg/dL | CrCl: '+(g('crcl').value||'ไม่ระบุ')+' ml/min | Child-Pugh: '+(g('cpugh').value||'ไม่ระบุ'),'ตั้งครรภ์: '+preg+' | ให้นมบุตร: '+(lact?'ใช่':'ไม่'));
+  const _labs=collectDetailedLabs();if(_labs)p.push('','=== Lab โดยละเอียด (Hospital Labs) ===',_labs);
   p.push('','=== รายการยา ===',g('meds').value);
   const sup=g('supplements').value.trim();if(sup)p.push('','=== อาหารเสริม ===',sup);
   const q=g('questions').value.trim();if(q)p.push('','=== คำถามเพิ่มเติม ===',q);
@@ -1100,10 +1207,35 @@ function showRevSt(state,msg){
   if(state==='empty')document.getElementById('revEmpty').style.display='flex';
 }
 async function copyReview(){try{await navigator.clipboard.writeText(reviewRes);toast('✓ คัดลอก Markdown แล้ว');}catch{toast('❌ คัดลอกไม่สำเร็จ','#dc2626');}}
-let guideLoading=false;
-async function openGuide(){if(guideLoading)return;openModal('modalGuide');if(guideCache){document.getElementById('guideContent').innerHTML=safeHtml(guideCache);return;}guideLoading=true;document.getElementById('guideContent').innerHTML='<div class="loading-st" style="min-height:160px"><div class="loading-ring" style="width:32px;height:32px;border-width:3px"></div></div>';try{const r=await callGAS('generatePatientGuide',document.getElementById('meds').value);guideCache=r;document.getElementById('guideContent').innerHTML=safeHtml(r);}catch(e){document.getElementById('guideContent').innerHTML='<div class="err-box">❌ '+e.message+'</div>';}finally{guideLoading=false;}}
+let guideLoading=false,lastGuideText='';
+// คู่มือผู้ป่วยแบบรวม — แปลงคำตอบของแต่ละหมวดเป็นภาษาเข้าใจง่ายสำหรับผู้ป่วย
+function getAnswerText(source){
+  if(source==='review')return reviewRes||document.getElementById('meds')?.value.trim()||'';
+  if(source==='ddi')return ddiResultText||'';
+  if(source==='rh')return rhResultText||'';
+  if(source==='dose'){const m=[...doseHistory].reverse().find(x=>x.role==='assistant');return m?m.content:'';}
+  const m=[...chatHistory].reverse().find(x=>x.role==='assistant');return m?m.content:'';
+}
+const GUIDE_SRC_LABEL={review:'ผลวิเคราะห์รายการยา',chat:'คำตอบคลินิก',dose:'ผลคำนวณขนาดยา',ddi:'ผลตรวจ Interactions',rh:'การปรับขนาดยา (ไต/ตับ)'};
+async function openGuideFor(source){
+  if(guideLoading)return;
+  const text=getAnswerText(source);
+  if(!text){toast('⚠ ยังไม่มีคำตอบในหมวดนี้ — วิเคราะห์หรือถามก่อน','#b45309');return;}
+  openModal('modalGuide');
+  const box=document.getElementById('guideContent');
+  guideLoading=true;
+  box.innerHTML='<div class="loading-st" style="min-height:160px;flex-direction:column"><div class="loading-ring" style="width:32px;height:32px;border-width:3px"></div><p style="margin-top:.7rem;font-size:.82rem;color:var(--s6);text-align:center;line-height:1.6">AI กำลังแปลง<b>'+(GUIDE_SRC_LABEL[source]||'คำตอบ')+'</b><br>เป็นภาษาที่ผู้ป่วยอ่านเองเข้าใจง่าย...</p></div>';
+  try{
+    const r=await callGAS('generateGuideFromText',text);
+    lastGuideText=r;guideCache=r;
+    box.innerHTML=safeHtml(r);
+  }catch(e){box.innerHTML='<div class="err-box">❌ '+e.message+'</div>';}
+  finally{guideLoading=false;}
+}
+function openGuide(){openGuideFor('review');}
+function printGuide(){if(!lastGuideText){toast('⚠ ยังไม่มีคู่มือผู้ป่วย','#b45309');return;}openPrintWindow('คู่มือผู้ป่วย (ฉบับเข้าใจง่าย)',mdToHtml(lastGuideText),false);}
 async function copyGuide(){try{await navigator.clipboard.writeText(document.getElementById('guideContent').innerText);toast('✓ คัดลอกคู่มือแล้ว');}catch{toast('❌ ไม่สำเร็จ','#dc2626');}}
-function clearReview(){['age','weight','height','diagnosis','allergies','scr','crcl','meds','supplements','questions'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['sex','cpugh','trimester'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['lact','pregCb','lactCb'].forEach(id=>{const e=document.getElementById(id);if(e)e.checked=false;});document.querySelectorAll('.atag').forEach(b=>b.classList.remove('on'));reviewRes='';guideCache='';clearImg('review');document.getElementById('crclHint').textContent='';updMedCnt();togglePreg();showRevSt('empty');['guideBtn','copyRevBtn','printRevBtn','qrBtn'].forEach(id=>document.getElementById(id).style.display='none');toast('✓ ล้างแบบฟอร์มแล้ว','#475569');}
+function clearReview(){['age','weight','height','diagnosis','allergies','scr','crcl','meds','supplements','questions'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['sex','cpugh','trimester'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['lact','pregCb','lactCb'].forEach(id=>{const e=document.getElementById(id);if(e)e.checked=false;});document.querySelectorAll('.atag').forEach(b=>b.classList.remove('on'));reviewRes='';guideCache='';clearImg('review');document.getElementById('crclHint').textContent='';updMedCnt();togglePreg();showRevSt('empty');document.querySelectorAll('[id^="lb-"]').forEach(e=>{e.value='';});if(typeof updLabCount==='function')updLabCount();['guideBtn','copyRevBtn','printRevBtn','qrBtn'].forEach(id=>document.getElementById(id).style.display='none');toast('✓ ล้างแบบฟอร์มแล้ว','#475569');}
 
 // ── IMAGE HANDLING ──
 function handleImg(input,target){const file=input.files[0];if(!file)return;if(!file.type.startsWith('image/')){toast('⚠ ต้องเป็นรูปภาพ','#b45309');return;}if(file.size>10*1024*1024){toast('⚠ เกิน 10MB','#b45309');return;}const reader=new FileReader();reader.onload=e=>{const url=e.target.result;pendingImgs[target]={b64:url.split(',')[1],mime:file.type,url,name:file.name};showImgPreview(target);};reader.readAsDataURL(file);input.value='';}
@@ -1117,7 +1249,7 @@ function processExtractFile(file){if(!file.type.startsWith('image/')){toast('⚠
 function resetExtractImg(){extractImgData=null;document.getElementById('extractImgPreview').style.display='none';document.getElementById('extractDZ').style.display='block';document.getElementById('autoFillBtn').disabled=true;}
 function switchExtTab(tab){const isT=tab==='text';document.getElementById('extPanelText').style.display=isT?'block':'none';document.getElementById('extPanelImg').style.display=isT?'none':'block';document.getElementById('extTabText').style.background=isT?'var(--card-bg)':'transparent';document.getElementById('extTabText').style.color=isT?'var(--s8)':'var(--s4)';document.getElementById('extTabImg').style.background=isT?'transparent':'var(--card-bg)';document.getElementById('extTabImg').style.color=isT?'var(--s4)':'var(--s8)';}
 async function doExtractText(){const raw=document.getElementById('rawNote').value.trim();if(!raw){toast('⚠ กรุณาวางข้อความก่อน','#b45309');return;}const btn=document.getElementById('extractTextBtn');btn.disabled=true;btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> กำลังสกัด...';try{const res=await callGAS('extractMedicationsFromNote',raw);const el=document.getElementById('meds');el.value+=(el.value?'\n':'')+res.trim();document.getElementById('rawNote').value='';updMedCnt();closeModal('modalExtract');toast('✓ สกัดรายการยาสำเร็จ');}catch(e){toast('❌ '+e.message,'#dc2626');}finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-wand-magic-sparkles"></i> สกัดรายการยา';}}
-async function doAutoFill(){if(!extractImgData){toast('⚠ กรุณาเลือกรูปก่อน','#b45309');return;}const btn=document.getElementById('autoFillBtn');btn.disabled=true;btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> กำลังวิเคราะห์...';try{const raw=await callGAS('autoFillFromImage',extractImgData.b64,extractImgData.mime);const cleaned=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();let data;try{data=JSON.parse(cleaned);}catch{throw new Error('แปลง JSON ไม่สำเร็จ');}const g=id=>document.getElementById(id);if(data.age)g('age').value=data.age;if(data.sex&&(data.sex==='ชาย'||data.sex==='หญิง'))g('sex').value=data.sex;if(data.weight)g('weight').value=data.weight;if(data.height)g('height').value=data.height;if(data.diagnosis)g('diagnosis').value=data.diagnosis;if(data.allergies)g('allergies').value=data.allergies;if(data.scr)g('scr').value=data.scr;if(data.crcl)g('crcl').value=data.crcl;if(data.childpugh){const cp=data.childpugh.trim();if(cp==='A'||cp==='A (5-6)')g('cpugh').value='A (5-6)';else if(cp==='B'||cp==='B (7-9)')g('cpugh').value='B (7-9)';else if(cp==='C'||cp==='C (10-15)')g('cpugh').value='C (10-15)';}if(data.medications){const el=g('meds');el.value+=(el.value?'\n':'')+data.medications;updMedCnt();}if(data.supplements)g('supplements').value=data.supplements;togglePreg();calcCrCl();extractImgData=null;resetExtractImg();closeModal('modalExtract');toast('✓ Auto-fill สำเร็จ! กรุณาตรวจสอบก่อนวิเคราะห์');}catch(e){toast('❌ '+e.message,'#dc2626');}finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-robot"></i> Auto-fill ทุกช่อง';}}
+async function doAutoFill(){if(!extractImgData){toast('⚠ กรุณาเลือกรูปก่อน','#b45309');return;}const btn=document.getElementById('autoFillBtn');btn.disabled=true;btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> กำลังวิเคราะห์...';try{const raw=await callGAS('autoFillFromImage',extractImgData.b64,extractImgData.mime);const cleaned=raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();let data;try{data=JSON.parse(cleaned);}catch{throw new Error('แปลง JSON ไม่สำเร็จ');}const g=id=>document.getElementById(id);if(data.age)g('age').value=data.age;if(data.sex&&(data.sex==='ชาย'||data.sex==='หญิง'))g('sex').value=data.sex;if(data.weight)g('weight').value=data.weight;if(data.height)g('height').value=data.height;if(data.diagnosis)g('diagnosis').value=data.diagnosis;if(data.allergies)g('allergies').value=data.allergies;if(data.scr)g('scr').value=data.scr;if(data.crcl)g('crcl').value=data.crcl;if(data.childpugh){const cp=data.childpugh.trim();if(cp==='A'||cp==='A (5-6)')g('cpugh').value='A (5-6)';else if(cp==='B'||cp==='B (7-9)')g('cpugh').value='B (7-9)';else if(cp==='C'||cp==='C (10-15)')g('cpugh').value='C (10-15)';}if(data.medications){const el=g('meds');el.value+=(el.value?'\n':'')+data.medications;updMedCnt();}if(data.supplements)g('supplements').value=data.supplements;let labN=0;if(data.labs&&typeof data.labs==='object'){LAB_DEFS.forEach(d=>{const key=d[0].slice(3);const v=(data.labs[key]!=null)?String(data.labs[key]).trim():'';if(v){const el=g(d[0]);if(el){el.value=v;el.classList.add('lab-autofilled');el.addEventListener('input',function clr(){el.classList.remove('lab-autofilled');el.removeEventListener('input',clr);});labN++;}}});updLabCount();if(labN>0){const lb=g('labsBody'),lc=g('labsChevron');if(lb){lb.style.display='flex';if(lc)lc.style.transform='rotate(180deg)';}}}togglePreg();calcCrCl();extractImgData=null;resetExtractImg();closeModal('modalExtract');toast(labN>0?('✓ Auto-fill สำเร็จ! กรอกค่า Lab '+labN+' ค่า (เน้นสีเหลือง) — โปรดตรวจค่าก่อนวิเคราะห์'):'✓ Auto-fill สำเร็จ! กรุณาตรวจสอบก่อนวิเคราะห์');}catch(e){toast('❌ '+e.message,'#dc2626');}finally{btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-robot"></i> Auto-fill ทุกช่อง';}}
 
 // ── CONTEXT PANEL (Chat) ──
 function toggleCtx(){ctxOpen=!ctxOpen;document.getElementById('ctxPanel').classList.toggle('open',ctxOpen);const btn=document.getElementById('ctxBtn');btn.style.background=ctxOpen?'var(--t0)':'';btn.style.color=ctxOpen?'var(--t7)':'';}
@@ -1360,11 +1492,11 @@ async function checkDDI(){
   const btn=document.getElementById('ddiBtn');btn.disabled=true;btn.innerHTML='<div class="spin"></div> กำลังตรวจสอบ...';
   const ld=document.getElementById('ddiLoading'),rs=document.getElementById('ddiResult');
   ld.style.display='block';rs.style.display='none';
-  try{const res=await callGAS('checkDDI',drugs,supps);rs.innerHTML=safeHtml(res);rs.style.display='block';}
+  try{const res=await callGAS('checkDDI',drugs,supps);ddiResultText=res;saveResultSession('ddi',drugs,supps,res);rs.innerHTML=safeHtml(res);rs.style.display='block';}
   catch(e){rs.innerHTML='<div class="err-box">❌ '+e.message+'</div>';rs.style.display='block';}
   finally{ld.style.display='none';btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-magnifying-glass"></i> ตรวจ Interactions';}
 }
-function clearDDI(){['ddi-drugs','ddi-supps'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['ddiResult','ddiLoading'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});}
+function clearDDI(){['ddi-drugs','ddi-supps'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['ddiResult','ddiLoading'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});ddiResultText='';}
 
 
 // ══════════════════════════════
@@ -1422,6 +1554,7 @@ async function doRHQuery(){
     const hJson=JSON.stringify([{role:'user',content:question}]);
     const cJson=JSON.stringify(ctx);
     const res=await callGAS('calcDosing',hJson,cJson);
+    rhResultText=res;saveResultSession('rh',drugs,'',res);
     document.getElementById('rhResult').innerHTML=safeHtml(res);
     document.getElementById('rhResult').style.display='block';
   }catch(e){
@@ -1439,7 +1572,7 @@ function clearRHResult(){
   document.getElementById('rhResult').style.display='none';
   document.getElementById('rhLoading').style.display='none';
   document.getElementById('rhCtxBar').style.display='none';
-  rhPatientCtx={};
+  rhPatientCtx={};rhResultText='';
 }
 
 // ══════════════════════════════
@@ -1465,7 +1598,7 @@ let qrSource='review',qrCurrentText='';
 function openQR(source){
   qrSource=source||'review';
   const lb=document.getElementById('qrSourceLabel');
-  if(lb)lb.textContent=qrSource==='review'?'📋 วิเคราะห์รายการยา':qrSource==='chat'?'💬 ถาม-ตอบคลินิก':'🧮 คำนวณขนาดยา';
+  if(lb)lb.textContent=qrSource==='review'?'📋 วิเคราะห์รายการยา':qrSource==='chat'?'💬 ถาม-ตอบคลินิก':qrSource==='ddi'?'⚠️ ตรวจ Drug Interactions':qrSource==='rh'?'🧬 ปรับขนาดยา (ไต/ตับ)':'🧮 คำนวณขนาดยา';
   const desc=document.getElementById('qrDesc');
   // ดึงเนื้อหาตาม context
   let preview='';
@@ -1498,7 +1631,7 @@ async function shareContent(){
   const txt=qrSource==='review'?(reviewRes||document.getElementById('meds')?.value||''):src.text;
   if(!txt){toast('⚠ ไม่มีเนื้อหาให้แชร์','#b45309');return;}
   if(navigator.share){
-    try{await navigator.share({title:'AI Clinical Pharmacist',text:txt});}
+    try{await navigator.share({title:'Clinical Pharmacist',text:txt});}
     catch(e){if(e.name!=='AbortError')toast('แชร์ไม่สำเร็จ','#b45309');}
   }else{
     try{await navigator.clipboard.writeText(txt);toast('💻 อุปกรณ์นี้ไม่รองรับแชร์ตรง — คัดลอกให้แล้ว');}
@@ -1529,7 +1662,7 @@ async function exportPDF(){
     // chat / dose → PDF จากคำตอบ AI ล่าสุด
     const src=getShareSource();
     if(!src.text){toast('⚠ '+src.emptyMsg,'#b45309');return;}
-    title=qrSource==='dose'?'ผลการคำนวณขนาดยา':'คำตอบจาก AI (คลินิก)';
+    title=qrSource==='dose'?'ผลการคำนวณขนาดยา':qrSource==='ddi'?'ผลตรวจ Drug Interactions':qrSource==='rh'?'การปรับขนาดยา (Renal/Hepatic)':'คำตอบคลินิก';
     body=mdToHtml(src.text);
   }
   openPrintWindow(title,body,false);
@@ -1574,6 +1707,8 @@ function getShareSource(){
     const meds=document.getElementById('meds')?.value.trim()||'';
     return {text:meds, emptyMsg:'ไม่มีรายการยาในหน้าวิเคราะห์'};
   }
+  if(qrSource==='ddi')return {text:ddiResultText, emptyMsg:'ยังไม่มีผลตรวจ Interactions'};
+  if(qrSource==='rh')return {text:rhResultText, emptyMsg:'ยังไม่มีผลวิเคราะห์การปรับขนาดยา'};
   // chat / dose → ใช้คำตอบ AI ล่าสุด (มีขนาดยาที่ปรับแล้ว)
   let last=null;
   if(qrSource==='dose')last=[...doseHistory].reverse().find(m=>m.role==='assistant');
@@ -1605,11 +1740,13 @@ function openPrintWindow(title,bodyHtml,isLabel){
     body{font-family:'Sarabun','TH Sarabun New',sans-serif;padding:16px;color:#1e293b;line-height:1.6}
     h1{font-size:16pt;color:#0f766e;text-align:center;margin-bottom:4px}
     .head-sub{text-align:center;font-size:9pt;color:#888;margin-bottom:14px}
+    .pdf-disc{margin-top:18px;padding-top:8px;border-top:1px dashed #cbd5e1;font-size:8.5pt;color:#64748b;line-height:1.45}
     ${labelCSS}
     </style></head><body>
-    <h1>${title}</h1>
-    <div class="head-sub">AI Clinical Pharmacist · ${new Date().toLocaleString('th-TH')}</div>
+    <h1>Clinical Pharmacist</h1>
+    <div class="head-sub">${title} · ${new Date().toLocaleString('th-TH')}</div>
     ${isLabel?'<div style="display:flex;flex-wrap:wrap;gap:8px">'+bodyHtml+'</div>':bodyHtml}
+    ${isLabel?'':'<div class="pdf-disc">⚕️ เอกสารนี้สร้างโดยเครื่องมือช่วยตัดสินใจ (Clinical Pharmacist) — ต้องผ่านการตรวจสอบและรับรองโดยเภสัชกร/แพทย์ก่อนใช้ในการรักษา · ไม่ใช่คำสั่งการรักษา</div>'}
     <script>window.onload=()=>{setTimeout(()=>window.print(),400)}<\/script>
     </body></html>`);
   w.document.close();
@@ -1619,7 +1756,7 @@ function openPrintWindow(title,bodyHtml,isLabel){
 function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function mdToHtml(md){try{return marked.parse(md||'');}catch{return escapeHtml(md||'').replace(/\n/g,'<br>');}}
 
-function exportText(source){let content='',filename='';if(source==='chat'){if(!chatHistory.length){toast('⚠ ยังไม่มีการสนทนา','#b45309');return;}content=chatHistory.map(m=>(m.role==='user'?'👤 คุณ:\n':' \n🤖 AI:\n')+m.content).join('\n\n---\n');filename='clinical-chat-'+Date.now()+'.txt';}else if(source==='dose'){if(!doseHistory.length){toast('⚠ ยังไม่มีการคำนวณ','#b45309');return;}content=doseHistory.map(m=>(m.role==='user'?'👤 คำถาม:\n':'\n💊 คำนวณ:\n')+m.content).join('\n\n---\n');filename='dosing-calc-'+Date.now()+'.txt';}const blob=new Blob([content],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('✓ Export .txt สำเร็จ');}
+function exportText(source){let content='',filename='';if(source==='chat'){if(!chatHistory.length){toast('⚠ ยังไม่มีการสนทนา','#b45309');return;}content=chatHistory.map(m=>(m.role==='user'?'👤 คุณ:\n':' \n🤖 AI:\n')+m.content).join('\n\n---\n');filename='clinical-chat-'+Date.now()+'.txt';}else if(source==='dose'){if(!doseHistory.length){toast('⚠ ยังไม่มีการคำนวณ','#b45309');return;}content=doseHistory.map(m=>(m.role==='user'?'👤 คำถาม:\n':'\n💊 คำนวณ:\n')+m.content).join('\n\n---\n');filename='dosing-calc-'+Date.now()+'.txt';}else if(source==='ddi'){if(!ddiResultText){toast('⚠ ยังไม่มีผลตรวจ Interactions','#b45309');return;}const dr=document.getElementById('ddi-drugs')?.value||'';const sp=document.getElementById('ddi-supps')?.value||'';content='=== ยา ===\n'+dr+'\n\n=== อาหารเสริม/สมุนไพร ===\n'+(sp||'-')+'\n\n=== ผลตรวจ Drug Interactions ===\n'+ddiResultText;filename='drug-interactions-'+Date.now()+'.txt';}else if(source==='rh'){if(!rhResultText){toast('⚠ ยังไม่มีผลวิเคราะห์','#b45309');return;}const dr=document.getElementById('rh-drugs')?.value||'';content='=== รายการยา ===\n'+dr+'\n\n=== การปรับขนาดยา (Renal/Hepatic) ===\n'+rhResultText;filename='dose-adjustment-'+Date.now()+'.txt';}const blob=new Blob([content],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('✓ Export .txt สำเร็จ');}
 
 // ══════════════════════════════
 // VOICE INPUT v3 — reuse instance, stop() ไม่ใช้ abort()
@@ -1687,7 +1824,7 @@ function _micFail(){
 // ══════════════════════════════
 // SESSION HISTORY — Chat & Dose (localStorage, 10 each)
 // ══════════════════════════════
-const SESS_KEYS={chat:'pharma_chat_hist',dose:'pharma_dose_hist'};
+const SESS_KEYS={chat:'pharma_chat_hist',dose:'pharma_dose_hist',ddi:'pharma_ddi_hist',rh:'pharma_rh_hist'};
 const MAX_SESS=10;
 let curSessType='chat';
 
@@ -1715,9 +1852,19 @@ function saveSession(type){
   try{localStorage.setItem(SESS_KEYS[type],JSON.stringify(items));}catch(e){}
 }
 
+function saveResultSession(type,drugs,supps,result){
+  if(!result)return;
+  let items=getSessions(type);
+  const label=(drugs||result).replace(/[#*`>|]/g,'').replace(/\n+/g,' ').trim().substring(0,50)||'(ผลวิเคราะห์)';
+  const snap={id:Date.now(),ts:new Date().toISOString(),label,turns:1,drugs:drugs||'',supps:supps||'',result};
+  items.unshift(snap);
+  if(items.length>MAX_SESS)items=items.slice(0,MAX_SESS);
+  try{localStorage.setItem(SESS_KEYS[type],JSON.stringify(items));}catch(e){}
+}
 function openSessionHistory(type){
   curSessType=type;
-  document.getElementById('sessTitle').textContent=type==='chat'?'ประวัติการสนทนา (Chat)':'ประวัติการคำนวณ (Dose)';
+  const T={chat:'ประวัติการสนทนา (Chat)',dose:'ประวัติการคำนวณ (Dose)',ddi:'ประวัติตรวจ Interactions',rh:'ประวัติปรับขนาดยา (ไต/ตับ)'};
+  document.getElementById('sessTitle').textContent=T[type]||'ประวัติ';
   renderSessionList();
   openModal('modalSession');
 }
@@ -1729,7 +1876,7 @@ function renderSessionList(){
     el.innerHTML='<div class="empty-st" style="min-height:120px"><i class="fa-solid fa-clock-rotate-left" style="font-size:1.8rem;color:var(--border);margin-bottom:.5rem"></i><p style="font-size:.85rem;color:var(--s4)">ยังไม่มีประวัติ</p></div>';
     return;
   }
-  const ico=curSessType==='chat'?'fa-comments':'fa-calculator';
+  const ico=curSessType==='chat'?'fa-comments':curSessType==='ddi'?'fa-triangle-exclamation':curSessType==='rh'?'fa-table-list':'fa-calculator';
   el.innerHTML=items.map(it=>`
     <div class="hist-item" onclick="restoreSession(${it.id})">
       <div class="hist-ico"><i class="fa-solid ${ico}"></i></div>
@@ -1758,7 +1905,7 @@ function restoreSession(id){
     closeModal('modalSession');
     switchTab('chat');
     toast('✓ เรียกคืนการสนทนาแล้ว');
-  }else{
+  }else if(curSessType==='dose'){
     doseHistory=JSON.parse(JSON.stringify(it.data));
     const area=document.getElementById('doseChatArea');
     area.innerHTML='';
@@ -1766,6 +1913,19 @@ function restoreSession(id){
     closeModal('modalSession');
     switchTab('calc');
     toast('✓ เรียกคืนการคำนวณแล้ว');
+  }else if(curSessType==='ddi'){
+    document.getElementById('ddi-drugs').value=it.drugs||'';
+    document.getElementById('ddi-supps').value=it.supps||'';
+    ddiResultText=it.result;
+    const rs=document.getElementById('ddiResult');rs.innerHTML=safeHtml(it.result);rs.style.display='block';
+    closeModal('modalSession');switchTab('calc');
+    toast('✓ เรียกคืนผลตรวจ Interactions แล้ว');
+  }else if(curSessType==='rh'){
+    document.getElementById('rh-drugs').value=it.drugs||'';
+    rhResultText=it.result;
+    const rs=document.getElementById('rhResult');rs.innerHTML=safeHtml(it.result);rs.style.display='block';
+    closeModal('modalSession');switchTab('calc');
+    toast('✓ เรียกคืนการปรับขนาดยาแล้ว');
   }
 }
 
@@ -1809,8 +1969,32 @@ document.addEventListener('keydown',e=>{
 });
 
 // ── INIT ──
+/* ===== Governance: PHI scrub + consent + audit ===== */
+function scrubPHI(t){
+  if(typeof t!=='string'||!t||t.length>4000)return{t:t,n:0};
+  if(/^[A-Za-z0-9+/=\s]{200,}$/.test(t))return{t:t,n:0};
+  let n=0;
+  t=t.replace(/\b\d{13}\b/g,()=>{n++;return'[\u0e40\u0e25\u0e02\u0e1a\u0e31\u0e15\u0e23]';});
+  t=t.replace(/\b\d-\d{4}-\d{5}-\d{2}-\d\b/g,()=>{n++;return'[\u0e40\u0e25\u0e02\u0e1a\u0e31\u0e15\u0e23]';});
+  t=t.replace(/\b0\d{8,9}\b/g,()=>{n++;return'[\u0e40\u0e1a\u0e2d\u0e23\u0e4c\u0e42\u0e17\u0e23]';});
+  t=t.replace(/\b0\d{1,2}-\d{3}-\d{4}\b/g,()=>{n++;return'[\u0e40\u0e1a\u0e2d\u0e23\u0e4c\u0e42\u0e17\u0e23]';});
+  t=t.replace(/\b(HN|hn)\s*:?\s*\d{4,12}\b/g,()=>{n++;return'HN[redacted]';});
+  return{t:t,n:n};
+}
+const AUDIT_KEY='pharma_audit_log';
+function getUser(){return(localStorage.getItem('pharma_user')||'').trim();}
+function logAudit(action){try{const l=JSON.parse(localStorage.getItem(AUDIT_KEY)||'[]');l.push({ts:new Date().toISOString(),user:getUser()||'-',action:action});while(l.length>1000)l.shift();localStorage.setItem(AUDIT_KEY,JSON.stringify(l));}catch(e){}}
+function _govPre(fn,args){let hits=0;const out=args.map(a=>{const r=scrubPHI(a);hits+=r.n;return r.t;});if(hits>0)toast('\ud83d\udd12 \u0e25\u0e1a\u0e15\u0e31\u0e27\u0e23\u0e30\u0e1a\u0e38\u0e15\u0e31\u0e27\u0e15\u0e19 '+hits+' \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e01\u0e48\u0e2d\u0e19\u0e2a\u0e48\u0e07','#7c3aed');logAudit(fn);return out;}
+const CONSENT_KEY='pharma_consent_v1';
+function checkConsent(){if(!localStorage.getItem(CONSENT_KEY))openModal('modalConsent');}
+function acceptConsent(){if(!document.getElementById('consentChk').checked){toast('\u26a0 \u0e01\u0e23\u0e38\u0e13\u0e32\u0e15\u0e34\u0e4a\u0e01\u0e22\u0e37\u0e19\u0e22\u0e31\u0e19\u0e01\u0e48\u0e2d\u0e19','#b45309');return;}localStorage.setItem(CONSENT_KEY,new Date().toISOString());closeModal('modalConsent');toast('\u2713 \u0e23\u0e31\u0e1a\u0e17\u0e23\u0e32\u0e1a\u0e41\u0e25\u0e49\u0e27');}
+const AUDIT_MAP={analyzeMedications:'\u0e27\u0e34\u0e40\u0e04\u0e23\u0e32\u0e30\u0e2b\u0e4c\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e22\u0e32',analyzeMedicationsWithImage:'\u0e27\u0e34\u0e40\u0e04\u0e23\u0e32\u0e30\u0e2b\u0e4c\u0e22\u0e32(\u0e23\u0e39\u0e1b)',consultClinical:'\u0e1b\u0e23\u0e36\u0e01\u0e29\u0e32\u0e04\u0e25\u0e34\u0e19\u0e34\u0e01',consultClinicalWithImage:'\u0e1b\u0e23\u0e36\u0e01\u0e29\u0e32\u0e04\u0e25\u0e34\u0e19\u0e34\u0e01(\u0e23\u0e39\u0e1b)',calcDosing:'\u0e04\u0e33\u0e19\u0e27\u0e13\u0e02\u0e19\u0e32\u0e14\u0e22\u0e32',autoFillFromImage:'Auto-fill \u0e08\u0e32\u0e01\u0e23\u0e39\u0e1b',extractMedicationsFromNote:'\u0e2a\u0e01\u0e31\u0e14\u0e22\u0e32\u0e08\u0e32\u0e01 Note',generatePatientGuide:'\u0e04\u0e39\u0e48\u0e21\u0e37\u0e2d\u0e1c\u0e39\u0e49\u0e1b\u0e48\u0e27\u0e22',generateGuideFromText:'\u0e04\u0e39\u0e48\u0e21\u0e37\u0e2d\u0e1c\u0e39\u0e49\u0e1b\u0e48\u0e27\u0e22',checkDDI:'\u0e15\u0e23\u0e27\u0e08 Drug Interaction',summarizeForQR:'\u0e2a\u0e23\u0e49\u0e32\u0e07 QR',generateDrugLabel:'\u0e2a\u0e23\u0e49\u0e32\u0e07\u0e09\u0e25\u0e32\u0e01\u0e22\u0e32'};
+function openAudit(){renderAudit();openModal('modalAudit');}
+function renderAudit(){let l=[];try{l=JSON.parse(localStorage.getItem(AUDIT_KEY)||'[]');}catch(e){}const el=document.getElementById('auditBody');if(!el)return;if(!l.length){el.innerHTML='<div style="text-align:center;color:var(--s4);padding:1.2rem">\u0e22\u0e31\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e01\u0e32\u0e23\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19</div>';return;}const th='padding:5px 8px;border-bottom:2px solid var(--border);text-align:left;position:sticky;top:0;background:var(--card)';const td='padding:5px 8px;border-bottom:1px solid var(--border)';el.innerHTML='<table style="width:100%;border-collapse:collapse;font-size:.78rem"><thead><tr><th style="'+th+'">\u0e40\u0e27\u0e25\u0e32</th><th style="'+th+'">\u0e1c\u0e39\u0e49\u0e43\u0e0a\u0e49</th><th style="'+th+'">\u0e01\u0e32\u0e23\u0e17\u0e33\u0e07\u0e32\u0e19</th></tr></thead><tbody>'+l.slice().reverse().map(r=>'<tr><td style="'+td+'">'+new Date(r.ts).toLocaleString('th-TH')+'</td><td style="'+td+'">'+(r.user||'-')+'</td><td style="'+td+'">'+(AUDIT_MAP[r.action]||r.action)+'</td></tr>').join('')+'</tbody></table>';}
+function exportAudit(){let l=[];try{l=JSON.parse(localStorage.getItem(AUDIT_KEY)||'[]');}catch(e){}if(!l.length){toast('\u26a0 \u0e22\u0e31\u0e07\u0e44\u0e21\u0e48\u0e21\u0e35\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01','#b45309');return;}const csv='\ufefftimestamp,user,action\n'+l.map(r=>'"'+r.ts+'","'+(r.user||'').replace(/"/g,'""')+'","'+r.action+'"').join('\n');const b=new Blob([csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='audit-log-'+Date.now()+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('\u2713 Export audit log \u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08');}
+function clearAudit(){if(!confirm('\u0e25\u0e1a\u0e1a\u0e31\u0e19\u0e17\u0e36\u0e01\u0e01\u0e32\u0e23\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14?'))return;localStorage.removeItem(AUDIT_KEY);renderAudit();toast('\u2713 \u0e25\u0e49\u0e32\u0e07 audit log \u0e41\u0e25\u0e49\u0e27','#475569');}
 document.addEventListener('DOMContentLoaded',()=>{
-  initTheme();togglePreg();updMedCnt();initWelcome();updateHistCount();
+  initTheme();togglePreg();updMedCnt();initWelcome();updateHistCount();const gu=document.getElementById('govUser');if(gu)gu.value=localStorage.getItem('pharma_user')||'';checkConsent();
   // History button
   document.getElementById('histBtn')?.addEventListener('click',()=>{renderHistoryList();openModal('modalHistory');});
   // Show panels
