@@ -620,7 +620,7 @@ select.inp{cursor:pointer}
     <div class="chat-wrap">
       <div class="chat-hd">
         <div class="chat-hd-title"><i class="fa-solid fa-comments"></i> ถาม-ตอบคลินิก (ปลายเปิด)</div>
-        <div style="display:flex;gap:.35rem;align-items:center">
+        <div style="display:flex;gap:.35rem;align-items:center;flex-wrap:wrap">
           <span id="chatMsgCount" style="font-size:.68rem;color:var(--s4)">0 ข้อความ</span>
           <button onclick="toggleCtx()" class="pill pill-tl" id="ctxBtn" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-sliders" style="font-size:.6rem"></i> บริบทผู้ป่วย</button>
           <button onclick="openQR('chat')" class="pill pill-tl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-share-nodes" style="font-size:.6rem"></i> แชร์/พิมพ์</button>
@@ -706,7 +706,7 @@ select.inp{cursor:pointer}
         <div class="card" style="flex:1">
           <div class="card-hd">
             <div class="card-title"><i class="fa-solid fa-robot"></i> AI คำนวณขนาดยา</div>
-            <div style="display:flex;gap:.3rem">
+            <div style="display:flex;gap:.3rem;flex-wrap:wrap">
               <button onclick="openQR('dose')" class="pill pill-tl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-share-nodes" style="font-size:.6rem"></i> แชร์/พิมพ์</button>
               <button onclick="openSessionHistory('dose')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-clock-rotate-left" style="font-size:.6rem"></i> ประวัติ</button>
               <button onclick="exportText('dose')" class="pill pill-sl" style="font-size:.67rem;padding:3px 8px"><i class="fa-solid fa-download" style="font-size:.6rem"></i> Export</button>
