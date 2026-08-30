@@ -430,7 +430,7 @@ select.inp{cursor:pointer}
     <button class="dm-btn" id="dmBtn" onclick="toggleDarkMode()" title="สลับ Dark / Light Mode">
       <i class="fa-solid fa-moon" id="dmIcon"></i>
     </button>
-    <div class="model-pill"><span class="pdot"></span>gemini-3.1-flash-lite</div>
+    <div class="model-pill"><span class="pdot"></span>gemini-3.5-flash-lite</div>
   </div>
 </header>
 <div class="gov-bar">
@@ -990,7 +990,23 @@ select.inp{cursor:pointer}
 <script>
 // ── INIT ──
 marked.setOptions({breaks:true,gfm:true});
-function safeHtml(md){return marked.parse(md||'').replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\sonerror\s*=/gi,' data-err=').replace(/javascript:/gi,'blocked:');}
+function stripLatex(t){
+  if(typeof t!=='string'||!t)return t;
+  t=t.replace(/\${1,2}/g,'');
+  t=t.replace(/\\text\{([^{}]*)\}/g,'$1');
+  for(let i=0;i<2;i++)t=t.replace(/\\frac\{([^{}]*)\}\{([^{}]*)\}/g,'($1 ÷ $2)');
+  t=t.replace(/\\times/g,'×').replace(/\\cdot/g,'×').replace(/\\div/g,'÷')
+   .replace(/\\pm/g,'±').replace(/\\rightarrow|\\to\b/g,'→')
+   .replace(/\\leq|\\le\b/g,'≤').replace(/\\geq|\\ge\b/g,'≥')
+   .replace(/\\approx/g,'≈').replace(/\\%/g,'%')
+   .replace(/\\mu/g,'µ').replace(/\\Delta/g,'Δ').replace(/\\alpha/g,'α')
+   .replace(/\\beta/g,'β').replace(/\\infty/g,'∞');
+  t=t.replace(/\\left|\\right/g,'');
+  t=t.replace(/\\([a-zA-Z]+)/g,'$1');
+  t=t.replace(/[ \t]{2,}/g,' ');
+  return t;
+}
+function safeHtml(md){return marked.parse(stripLatex(md||'')).replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\sonerror\s*=/gi,' data-err=').replace(/javascript:/gi,'blocked:');}
 
 function callGAS(fn, ...args) {
   args = _govPre(fn, args);
@@ -1783,7 +1799,7 @@ function openPrintWindow(title,bodyHtml,isLabel){
 }
 
 function escapeHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function mdToHtml(md){try{return marked.parse(md||'');}catch{return escapeHtml(md||'').replace(/\n/g,'<br>');}}
+function mdToHtml(md){try{return marked.parse(stripLatex(md||''));}catch{return escapeHtml(md||'').replace(/\n/g,'<br>');}}
 
 function exportText(source){let content='',filename='';if(source==='chat'){if(!chatHistory.length){toast('⚠ ยังไม่มีการสนทนา','#b45309');return;}content=chatHistory.map(m=>(m.role==='user'?'👤 คุณ:\n':' \n🤖 AI:\n')+m.content).join('\n\n---\n');filename='clinical-chat-'+Date.now()+'.txt';}else if(source==='dose'){if(!doseHistory.length){toast('⚠ ยังไม่มีการคำนวณ','#b45309');return;}content=doseHistory.map(m=>(m.role==='user'?'👤 คำถาม:\n':'\n💊 คำนวณ:\n')+m.content).join('\n\n---\n');filename='dosing-calc-'+Date.now()+'.txt';}else if(source==='ddi'){if(!ddiResultText){toast('⚠ ยังไม่มีผลตรวจ Interactions','#b45309');return;}const dr=document.getElementById('ddi-drugs')?.value||'';const sp=document.getElementById('ddi-supps')?.value||'';content='=== ยา ===\n'+dr+'\n\n=== อาหารเสริม/สมุนไพร ===\n'+(sp||'-')+'\n\n=== ผลตรวจ Drug Interactions ===\n'+ddiResultText;filename='drug-interactions-'+Date.now()+'.txt';}else if(source==='rh'){if(!rhResultText){toast('⚠ ยังไม่มีผลวิเคราะห์','#b45309');return;}const dr=document.getElementById('rh-drugs')?.value||'';content='=== รายการยา ===\n'+dr+'\n\n=== การปรับขนาดยา (Renal/Hepatic) ===\n'+rhResultText;filename='dose-adjustment-'+Date.now()+'.txt';}const blob=new Blob([content],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('✓ Export .txt สำเร็จ');}
 
