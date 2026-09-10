@@ -88,6 +88,7 @@
         <p class="muted">กรอกจากคำสั่งรักษา/แผนที่เภสัชกรตรวจแล้ว ฉลากจะใช้ข้อความนี้โดยตรง ไม่มี AI เปลี่ยนขนาดยา</p>
         <div id="ordersList"></div>
         <label>สรุปการตรวจสอบและเหตุผล<textarea id="reviewNote" rows="3" maxlength="3000" placeholder="ตรวจผู้ป่วย แพ้ยา ข้อบ่งใช้ ขนาด ความถี่ วิธีใช้ และแหล่งอ้างอิงใดแล้วบ้าง"></textarea></label>
+        <label class="check"><input id="orderConsent" type="checkbox"> ตรวจแล้วว่าไม่มีข้อมูลระบุตัวผู้ป่วย และอนุญาตส่งรายการนี้เพื่อบันทึกการรับรอง</label>
         <label class="check"><input id="reviewed" type="checkbox"> ฉันตรวจรายการจ่าย ขนาดยา วิธีใช้ และเอกสารต้นทางครบแล้ว</label>
         <div class="inline-actions"><button id="approveBtn" class="primary">รับรองและบันทึกผู้ตรวจ</button><button id="printLabels" class="secondary">พิมพ์ฉลากที่รับรองแล้ว</button></div>
         <div id="approvalState" class="notice">ยังไม่ได้รับรอง — การแก้เคส รายการยา หรือหลักฐานจะยกเลิกการรับรองเดิม</div>
