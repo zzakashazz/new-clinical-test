@@ -1,0 +1,27 @@
+name: Validate clinical workspace
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and deterministic backend tests
+        run: |
+          node --check app.js
+          node --check core.js
+          node --check setup.js
+          node --test tests/core.test.cjs tests/backend.test.cjs
+      - name: Install browser test runner
+        run: |
+          npm install --no-save --ignore-scripts playwright@1.62.1
+          npx playwright install --with-deps chromium
+      - name: Browser workflows (remote service mocked)
+        run: node tests/browser.cjs
